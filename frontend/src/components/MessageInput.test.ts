@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import fc from 'fast-check'
 import MessageInput from './MessageInput.vue'
@@ -213,7 +213,6 @@ describe('MessageInput', () => {
       })
 
       const textarea = wrapper.find('textarea')
-      const button = wrapper.find('button[type="submit"]')
 
       // Textarea should not be disabled
       expect(textarea.attributes('disabled')).toBeUndefined()

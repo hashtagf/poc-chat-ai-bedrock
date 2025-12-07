@@ -35,31 +35,6 @@ const ERROR_MESSAGES: Record<string, string> = {
 }
 
 /**
- * Sanitize error messages to remove internal details
- * Prevents exposure of stack traces, AWS SDK errors, or system paths
- */
-function sanitizeErrorMessage(error: unknown): string {
-  if (typeof error === 'string') {
-    // Remove common internal patterns
-    return error
-      .replace(/at\s+.*\(.*:\d+:\d+\)/g, '') // Stack trace lines
-      .replace(/\/[^\s]+\/[^\s]+/g, '') // File paths
-      .replace(/Error:\s*/g, '')
-      .trim()
-  }
-
-  if (error instanceof Error) {
-    // Extract just the message, no stack trace
-    return error.message
-      .replace(/at\s+.*\(.*:\d+:\d+\)/g, '')
-      .replace(/\/[^\s]+\/[^\s]+/g, '')
-      .trim()
-  }
-
-  return 'An error occurred'
-}
-
-/**
  * Transform infrastructure errors to domain errors
  * Maps AWS SDK and network errors to user-friendly ChatError objects
  */

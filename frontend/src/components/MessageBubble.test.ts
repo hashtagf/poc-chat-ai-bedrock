@@ -239,7 +239,7 @@ describe('MessageBubble', () => {
     it('should display error message when status is error and errorMessage is provided', () => {
       fc.assert(
         fc.property(
-          messageArb.filter(m => m.status === 'error' && m.errorMessage && m.errorMessage.trim().length > 0),
+          messageArb.filter(m => m.status === 'error' && !!m.errorMessage && m.errorMessage.trim().length > 0),
           (message) => {
             const wrapper = mount(MessageBubble, {
               props: { message }
