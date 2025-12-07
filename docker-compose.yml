@@ -1,0 +1,96 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: chat-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-chatdb}
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - chat-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chat-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Server configuration
+      - PORT=8080
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      
+      # AWS credentials (use IAM roles in production)
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      
+      # Bedrock Agent Core configuration
+      - BEDROCK_AGENT_ID=${BEDROCK_AGENT_ID}
+      - BEDROCK_AGENT_ALIAS_ID=${BEDROCK_AGENT_ALIAS_ID:-TSTALIASID}
+      - BEDROCK_KNOWLEDGE_BASE_ID=${BEDROCK_KNOWLEDGE_BASE_ID}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-anthropic.claude-v2}
+      
+      # MongoDB configuration
+      - MONGO_URI=mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017
+      - MONGO_DATABASE=${MONGO_DATABASE:-chatdb}
+      
+      # WebSocket configuration
+      - WS_TIMEOUT=${WS_TIMEOUT:-30s}
+      - WS_BUFFER_SIZE=${WS_BUFFER_SIZE:-8192}
+      
+      # Session configuration
+      - SESSION_TIMEOUT=${SESSION_TIMEOUT:-30m}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - chat-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chat-frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8080}
+      - VITE_WS_URL=${VITE_WS_URL:-ws://localhost:8080}
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - chat-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  chat-network:
+    driver: bridge
