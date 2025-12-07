@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import * as fc from 'fast-check'
 import { useErrorHandler } from './useErrorHandler'
-import type { ChatError } from '@/types'
 
 describe('useErrorHandler', () => {
   describe('Property 12: Error message sanitization', () => {

@@ -118,10 +118,10 @@ function getLastConnection(): MockWebSocket | null {
 describe('Error Scenarios Integration Tests', () => {
   beforeEach(() => {
     // Store original WebSocket
-    originalWebSocket = global.WebSocket
+    originalWebSocket = window.WebSocket
     
     // Replace with mock
-    global.WebSocket = MockWebSocket as any
+    window.WebSocket = MockWebSocket as any
     
     // Clear active connections
     activeWebSockets = []
@@ -133,7 +133,7 @@ describe('Error Scenarios Integration Tests', () => {
   afterEach(() => {
     // Restore original WebSocket
     if (originalWebSocket) {
-      global.WebSocket = originalWebSocket
+      window.WebSocket = originalWebSocket
     }
     
     // Clean up connections
@@ -152,7 +152,7 @@ describe('Error Scenarios Integration Tests', () => {
       const sessionId = 'test-network-failure-1'
       const errors: ChatError[] = []
       
-      const chatService = useChatService({
+      useChatService({
         sessionId,
         onError: (error) => errors.push(error)
       })
@@ -184,7 +184,7 @@ describe('Error Scenarios Integration Tests', () => {
       const sessionId = 'test-network-failure-2'
       const errors: ChatError[] = []
       
-      const chatService = useChatService({
+      const { sendMessage } = useChatService({
         sessionId,
         onError: (error) => errors.push(error)
       })
@@ -206,7 +206,7 @@ describe('Error Scenarios Integration Tests', () => {
         }
       })
       
-      await chatService.sendMessage('Test streaming')
+      await sendMessage('Test streaming')
       await new Promise(resolve => setTimeout(resolve, 200))
       
       // Verify stream interruption was detected
@@ -222,7 +222,7 @@ describe('Error Scenarios Integration Tests', () => {
       const sessionId = 'test-network-failure-3'
       const errors: ChatError[] = []
       
-      const chatService = useChatService({
+      useChatService({
         sessionId,
         onError: (error) => errors.push(error)
       })
@@ -247,7 +247,7 @@ describe('Error Scenarios Integration Tests', () => {
       const sessionId = 'test-connection-failure'
       const errors: ChatError[] = []
       
-      const chatService = useChatService({
+      useChatService({
         sessionId,
         onError: (error) => errors.push(error)
       })
@@ -272,7 +272,7 @@ describe('Error Scenarios Integration Tests', () => {
       const sessionId = 'test-reconnection'
       const errors: ChatError[] = []
       
-      const chatService = useChatService({
+      useChatService({
         sessionId,
         onError: (error) => errors.push(error)
       })

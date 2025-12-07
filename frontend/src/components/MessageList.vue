@@ -57,6 +57,9 @@ const isNearBottom = (): boolean => {
 const scrollToBottom = (smooth = true): void => {
   if (!containerRef.value) return
   
+  // Check if scrollTo is available (not available in jsdom test environment)
+  if (typeof containerRef.value.scrollTo !== 'function') return
+  
   const behavior = smooth ? 'smooth' : 'auto'
   containerRef.value.scrollTo({
     top: containerRef.value.scrollHeight,

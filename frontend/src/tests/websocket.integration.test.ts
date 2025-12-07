@@ -119,10 +119,10 @@ function simulateServerError(connection: MockWebSocket, code: string, message: s
 describe('WebSocket Integration Tests', () => {
   beforeEach(() => {
     // Store original WebSocket
-    originalWebSocket = global.WebSocket
+    originalWebSocket = window.WebSocket
     
     // Replace with mock
-    global.WebSocket = MockWebSocket as any
+    window.WebSocket = MockWebSocket as any
     
     // Clear active connections
     activeWebSockets = []
@@ -131,7 +131,7 @@ describe('WebSocket Integration Tests', () => {
   afterEach(() => {
     // Restore original WebSocket
     if (originalWebSocket) {
-      global.WebSocket = originalWebSocket
+      window.WebSocket = originalWebSocket
     }
     
     // Clean up connections
@@ -434,8 +434,6 @@ describe('WebSocket Integration Tests', () => {
       
       await new Promise(resolve => setTimeout(resolve, 50))
       
-      const initialConnectionCount = activeWebSockets.length
-      
       // Start streaming to trigger interruption error
       const connection = getLastConnection()
       expect(connection).toBeTruthy()
@@ -465,7 +463,7 @@ describe('WebSocket Integration Tests', () => {
       const sessionId = 'test-session-11'
       const errors: ChatError[] = []
       
-      const chatService = useChatService({
+      useChatService({
         sessionId,
         onError: (error) => errors.push(error)
       })

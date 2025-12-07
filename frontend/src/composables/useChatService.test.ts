@@ -81,7 +81,7 @@ describe('useChatService', () => {
     MockWebSocketConstructor.CLOSING = MockWebSocket.CLOSING
     MockWebSocketConstructor.CLOSED = MockWebSocket.CLOSED
     
-    global.WebSocket = MockWebSocketConstructor
+    window.WebSocket = MockWebSocketConstructor
   })
 
   afterEach(() => {

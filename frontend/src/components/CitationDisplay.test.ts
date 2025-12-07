@@ -15,12 +15,12 @@ const citationArb = fc.record({
   sourceId: fc.uuid(),
   sourceName: nonWhitespaceString(1, 100),
   excerpt: nonWhitespaceString(10, 500),
-  confidence: fc.option(fc.float({ min: 0, max: 1 })),
-  url: fc.option(fc.webUrl()),
+  confidence: fc.option(fc.float({ min: 0, max: 1 }), { nil: undefined }),
+  url: fc.option(fc.webUrl(), { nil: undefined }),
   metadata: fc.option(fc.dictionary(
     nonWhitespaceString(1, 20),
     fc.oneof(fc.string(), fc.integer(), fc.boolean())
-  ))
+  ), { nil: undefined })
 })
 
 // Generate array of citations with unique sourceIds
@@ -188,7 +188,7 @@ describe('CitationDisplay', () => {
               sourceName: nonWhitespaceString(1, 100),
               excerpt: nonWhitespaceString(10, 500),
               confidence: fc.float({ min: 0, max: 1 }),
-              url: fc.option(fc.webUrl()),
+              url: fc.option(fc.webUrl(), { nil: undefined }),
               metadata: fc.dictionary(
                 nonWhitespaceString(1, 20),
                 fc.oneof(nonWhitespaceString(1, 50), fc.integer(), fc.boolean()),
