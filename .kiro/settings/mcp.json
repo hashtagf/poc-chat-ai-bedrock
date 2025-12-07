@@ -13,11 +13,18 @@
     "aws-knowledge-mcp-server": {
       "url": "https://knowledge-mcp.global.api.aws",
       "type": "http",
-      "disabled": false
+      "disabled": false,
+      "autoApprove": [
+        "aws___search_documentation",
+        "aws___search_documentation",
+        "aws___search_documentation"
+      ]
     },
-     "awslabs.aws-documentation-mcp-server": {
+    "awslabs.aws-documentation-mcp-server": {
       "command": "uvx",
-      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "args": [
+        "awslabs.aws-documentation-mcp-server@latest"
+      ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR",
         "AWS_DOCUMENTATION_PARTITION": "aws",
