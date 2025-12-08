@@ -53,7 +53,7 @@ This design addresses all requirements from the requirements document:
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  Knowledge Base                                        │ │
 │  │  - Embedding Model: Titan Embeddings                   │ │
-│  │  - Vector Store: OpenSearch Serverless                 │ │
+│  │  - Vector Store: S3                                    │ │
 │  │  - Data Source: S3 Bucket                              │ │
 │  │  - IAM Role: Knowledge Base Execution Role             │ │
 │  └────────────────────────────────────────────────────────┘ │
@@ -68,10 +68,10 @@ This design addresses all requirements from the requirements document:
 │  │  - Lifecycle: Optional archival                        │ │
 │  └────────────────────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │  OpenSearch Serverless Collection                      │ │
-│  │  - Type: VECTORSEARCH                                  │ │
-│  │  - Standby Replicas: Enabled (Production)              │ │
-│  │  - Encryption: AWS-managed keys                        │ │
+│  │  S3 Bucket (Vector Storage)                            │ │
+│  │  - Versioning: Enabled                                 │ │
+│  │  - Encryption: AES-256                                 │ │
+│  │  - Purpose: Store vector embeddings                    │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 
@@ -81,12 +81,8 @@ This design addresses all requirements from the requirements document:
 │  │  S3 Bucket (Terraform State)                           │ │
 │  │  - Versioning: Enabled                                 │ │
 │  │  - Encryption: AES-256                                 │ │
+│  │  - Native Locking: Enabled                             │ │
 │  │  - Bucket Policy: Restrict access                      │ │
-│  └────────────────────────────────────────────────────────┘ │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  DynamoDB Table (State Locking)                        │ │
-│  │  - Primary Key: LockID                                 │ │
-│  │  - Billing Mode: PAY_PER_REQUEST                       │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -99,10 +95,10 @@ The Terraform code is organized into reusable modules:
 terraform/
 ├── modules/
 │   ├── bedrock-agent/          # Bedrock Agent configuration
-│   ├── knowledge-base/          # Knowledge Base with S3 and OpenSearch
+│   ├── knowledge-base/          # Knowledge Base with S3 vector store
 │   ├── iam/                     # IAM roles and policies
 │   ├── vpc/                     # VPC with endpoints (production)
-│   └── state-backend/           # S3 + DynamoDB for remote state
+│   └── state-backend/           # S3 for remote state
 ├── environments/
 │   ├── dev/
 │   │   ├── main.tf
@@ -144,18 +140,14 @@ terraform/
 
 ### 2. Knowledge Base Module
 
-**Purpose**: Provisions a Knowledge Base with S3 data source and OpenSearch Serverless vector store.
+**Purpose**: Provisions a Knowledge Base with S3 data source and S3 vector store.
 
 **Inputs**:
 - `knowledge_base_name` (string): Name of the Knowledge Base
 - `embedding_model` (string): Embedding model ID (e.g., "amazon.titan-embed-text-v1")
 - `kb_role_arn` (string): ARN of the IAM role for Knowledge Base
 - `s3_bucket_name` (string): Name of the S3 bucket for documents
-- `opensearch_collection_name` (string): Name of the OpenSearch Serverless collection
-- `vector_index_name` (string): Name of the vector index
-- `vector_field` (string): Field name for vector embeddings (default: "bedrock-knowledge-base-vector")
-- `text_field` (string): Field name for text content (default: "AMAZON_BEDROCK_TEXT_CHUNK")
-- `metadata_field` (string): Field name for metadata (default: "AMAZON_BEDROCK_METADATA")
+- `s3_vector_bucket_name` (string): Name of the S3 bucket for vector storage
 - `tags` (map): Resource tags
 
 **Outputs**:
@@ -163,17 +155,20 @@ terraform/
 - `knowledge_base_arn` (string): The Knowledge Base ARN
 - `s3_bucket_name` (string): The S3 bucket name for document uploads
 - `s3_bucket_arn` (string): The S3 bucket ARN
-- `opensearch_collection_endpoint` (string): OpenSearch Serverless collection endpoint
+- `s3_vector_bucket_name` (string): The S3 bucket name for vector storage
+- `s3_vector_bucket_arn` (string): The S3 bucket ARN for vector storage
 - `data_source_id` (string): The data source ID
 
 **Resources**:
 - `aws_s3_bucket`: S3 bucket for knowledge base documents
-- `aws_s3_bucket_versioning`: Enable versioning on S3 bucket
-- `aws_s3_bucket_server_side_encryption_configuration`: Enable encryption
-- `aws_opensearchserverless_collection`: OpenSearch Serverless collection for vectors
-- `aws_opensearchserverless_security_policy`: Encryption and network policies
-- `aws_opensearchserverless_access_policy`: Data access policy
-- `aws_bedrockagent_knowledge_base`: The Knowledge Base resource
+- `aws_s3_bucket_versioning`: Enable versioning on documents bucket
+- `aws_s3_bucket_server_side_encryption_configuration`: Enable encryption on documents bucket
+- `aws_s3_bucket_public_access_block`: Block public access to documents bucket
+- `aws_s3_bucket`: S3 bucket for vector storage
+- `aws_s3_bucket_versioning`: Enable versioning on vector bucket
+- `aws_s3_bucket_server_side_encryption_configuration`: Enable encryption on vector bucket
+- `aws_s3_bucket_public_access_block`: Block public access to vector bucket
+- `aws_bedrockagent_knowledge_base`: The Knowledge Base resource with S3 vector configuration
 - `aws_bedrockagent_data_source`: S3 data source configuration
 
 ### 3. IAM Module
@@ -185,8 +180,8 @@ terraform/
 - `environment` (string): Environment name (dev/staging/prod)
 - `foundation_model_arn` (string): ARN of the foundation model
 - `embedding_model_arn` (string): ARN of the embedding model
-- `s3_bucket_arn` (string): ARN of the S3 bucket
-- `opensearch_collection_arn` (string): ARN of the OpenSearch collection
+- `s3_bucket_arn` (string): ARN of the S3 documents bucket
+- `s3_vector_bucket_arn` (string): ARN of the S3 vector bucket
 - `tags` (map): Resource tags
 
 **Outputs**:
@@ -199,7 +194,7 @@ terraform/
 - `aws_iam_role`: Agent execution role with trust policy
 - `aws_iam_role_policy`: Agent policy for foundation model invocation
 - `aws_iam_role`: Knowledge Base execution role with trust policy
-- `aws_iam_role_policy`: Knowledge Base policy for S3, OpenSearch, and embedding model access
+- `aws_iam_role_policy`: Knowledge Base policy for S3 (documents and vectors) and embedding model access
 
 **IAM Policies**:
 
@@ -292,9 +287,14 @@ Knowledge Base Role Permissions:
     {
       "Effect": "Allow",
       "Action": [
-        "aoss:APIAccessAll"
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListBucket"
       ],
-      "Resource": "${opensearch_collection_arn}"
+      "Resource": [
+        "${s3_vector_bucket_arn}",
+        "${s3_vector_bucket_arn}/*"
+      ]
     },
     {
       "Effect": "Allow",
@@ -380,7 +380,7 @@ BEDROCK_AGENT_ALIAS_ID=<from terraform output>
 
 ### 5. State Backend Module
 
-**Purpose**: Creates S3 bucket and DynamoDB table for Terraform remote state management.
+**Purpose**: Creates S3 bucket for Terraform remote state management with native S3 locking.
 
 **Why Remote State?**
 
@@ -392,22 +392,23 @@ Terraform stores the current state of your infrastructure in a state file. By de
 - **Encrypted**: State files may contain sensitive data (IDs, ARNs)
 - **Durable**: S3 provides 99.999999999% durability
 
-**Why DynamoDB for State Locking?**
+**Why S3 Native Locking?**
 
-When multiple people or CI/CD pipelines run Terraform simultaneously, they could corrupt the state file. DynamoDB provides state locking to prevent this:
+When multiple people or CI/CD pipelines run Terraform simultaneously, they could corrupt the state file. S3 provides native state locking capabilities without requiring DynamoDB:
 
 **State Locking Mechanism**:
-1. Before running `terraform apply`, Terraform acquires a lock in DynamoDB
-2. The lock contains: lock ID, timestamp, who acquired it, operation info
+1. Before running `terraform apply`, Terraform acquires a lock using S3 object locking
+2. The lock is implemented using S3's conditional write operations
 3. Other Terraform operations wait until the lock is released
 4. After `terraform apply` completes, the lock is released
-5. If Terraform crashes, the lock remains and must be manually removed
+5. If Terraform crashes, the lock expires automatically after a timeout
 
 **Benefits**:
 - **Prevents Concurrent Modifications**: Only one person can modify infrastructure at a time
 - **Prevents State Corruption**: Ensures state file integrity
-- **Audit Trail**: DynamoDB records who locked the state and when
-- **Cost-Effective**: DynamoDB on-demand pricing is very cheap for this use case
+- **Simplified Infrastructure**: No additional DynamoDB table required
+- **Cost-Effective**: Only S3 storage costs, no additional service charges
+- **Automatic Lock Expiration**: Stale locks expire automatically
 
 **Example Scenario Without Locking**:
 ```
@@ -420,7 +421,7 @@ Time    Developer A              Developer B              State File
 ```
 Result: Resource X is created but not tracked in state → orphaned resource
 
-**With DynamoDB Locking**:
+**With S3 Native Locking**:
 ```
 Time    Developer A              Developer B              Lock Status
 10:00   terraform apply          -                        A acquires lock
@@ -433,20 +434,17 @@ Result: Sequential execution, no conflicts
 
 **Inputs**:
 - `state_bucket_name` (string): Name of the S3 bucket for state
-- `dynamodb_table_name` (string): Name of the DynamoDB table for locking
 - `tags` (map): Resource tags
 
 **Outputs**:
 - `state_bucket_name` (string): The state bucket name
 - `state_bucket_arn` (string): The state bucket ARN
-- `dynamodb_table_name` (string): The DynamoDB table name
 
 **Resources**:
 - `aws_s3_bucket`: S3 bucket for Terraform state
 - `aws_s3_bucket_versioning`: Enable versioning
 - `aws_s3_bucket_server_side_encryption_configuration`: Enable encryption
 - `aws_s3_bucket_public_access_block`: Block public access
-- `aws_dynamodb_table`: DynamoDB table for state locking (primary key: LockID)
 
 ## Data Models
 
@@ -469,7 +467,7 @@ idle_session_ttl     = 1800
 knowledge_base_name         = "bedrock-chat-poc-kb-dev"
 embedding_model             = "amazon.titan-embed-text-v1"
 s3_bucket_name              = "bedrock-chat-poc-kb-docs-dev"
-opensearch_collection_name  = "bedrock-chat-poc-vectors-dev"
+s3_vector_bucket_name       = "bedrock-chat-poc-kb-vectors-dev"
 
 # VPC (disabled for dev)
 enable_vpc = false
@@ -500,7 +498,7 @@ idle_session_ttl     = 3600
 knowledge_base_name         = "bedrock-chat-poc-kb-prod"
 embedding_model             = "amazon.titan-embed-text-v1"
 s3_bucket_name              = "bedrock-chat-poc-kb-docs-prod"
-opensearch_collection_name  = "bedrock-chat-poc-vectors-prod"
+s3_vector_bucket_name       = "bedrock-chat-poc-kb-vectors-prod"
 
 # VPC (enabled for prod)
 enable_vpc              = true
@@ -588,22 +586,23 @@ The following acceptance criteria are validated through infrastructure testing (
 
 **Knowledge Base Provisioning** (Requirements 2.1-2.6):
 - Verify S3 bucket is created
-- Verify S3 bucket has versioning and encryption enabled
+- Verify S3 documents bucket has versioning and encryption enabled
+- Verify S3 vector bucket has versioning and encryption enabled
 - Verify Knowledge Base is configured with embedding model
-- Verify OpenSearch Serverless collection is created and connected
+- Verify Knowledge Base is configured with S3 vector store
 - Verify S3 data source is configured
 - Verify Terraform outputs include knowledge_base_id
 
 **IAM Configuration** (Requirements 3.1-3.5):
 - Verify Agent IAM role has foundation model invocation permissions
-- Verify Knowledge Base IAM role has S3 read permissions
-- Verify Knowledge Base IAM role has OpenSearch write permissions
+- Verify Knowledge Base IAM role has S3 documents bucket read permissions
+- Verify Knowledge Base IAM role has S3 vector bucket read/write permissions
 - Verify Knowledge Base IAM role has embedding model invocation permissions
 - Verify all IAM policies follow least privilege principle (validated by Property 2)
 
 **State Management** (Requirements 4.1-4.4):
 - Verify Terraform state is stored in S3
-- Verify DynamoDB is used for state locking
+- Verify S3 native locking is enabled
 - Verify state bucket has encryption enabled
 - Verify state bucket has versioning enabled
 
@@ -642,25 +641,26 @@ The following acceptance criteria are validated through infrastructure testing (
 **Resource Creation Failures**:
 - Bedrock Agent preparation failures: Implement retry logic with `terraform_data` and `time_sleep` resources
 - IAM permission errors: Validate IAM policies before resource creation
-- OpenSearch collection creation timeouts: Increase timeout values and add depends_on relationships
 - S3 bucket name conflicts: Use unique naming with environment prefix
+- Knowledge Base sync failures: Verify S3 vector bucket permissions
 
 **State Management Errors**:
-- State locking conflicts: Implement proper state locking with DynamoDB
+- State locking conflicts: S3 native locking handles this automatically
 - State corruption: Enable S3 versioning for state bucket rollback
 - Concurrent modifications: Use workspace isolation or separate state files per environment
+- Stale locks: S3 native locking expires automatically, no manual intervention needed
 
 ### AWS Service Limits
 
 **Quota Exceeded**:
 - Bedrock Agent limits: Check service quotas before deployment
-- OpenSearch Serverless limits: Monitor collection count and capacity
+- S3 bucket limits: Verify bucket count within account limits
 - VPC endpoint limits: Verify endpoint quotas in target region
 
 **Region Availability**:
 - Bedrock service availability: Validate region supports Bedrock Agent and Knowledge Base
 - Foundation model availability: Check model availability in target region
-- OpenSearch Serverless availability: Verify service is available in region
+- S3 vector store support: Verify region supports S3 as Knowledge Base vector store
 
 ### Security Errors
 
@@ -793,7 +793,7 @@ func TestIAMPoliciesFollowLeastPrivilege(t *testing.T) {
     
     // Verify specific permissions are scoped
     verifyPolicyHasSpecificResourceARN(t, kbPolicy, "s3:GetObject")
-    verifyPolicyHasSpecificResourceARN(t, kbPolicy, "aoss:APIAccessAll")
+    verifyPolicyHasSpecificResourceARN(t, kbPolicy, "s3:PutObject")
     verifyPolicyHasSpecificResourceARN(t, kbPolicy, "bedrock:InvokeModel")
 }
 ```
@@ -839,15 +839,15 @@ func TestIAMPoliciesFollowLeastPrivilege(t *testing.T) {
 - **Rationale**: Enables code reuse across environments, simplifies testing, and follows Terraform best practices. Each module has a single responsibility and clear interface.
 - **Trade-offs**: Slightly more complex initial setup, but significantly easier to maintain and extend.
 
-**2. Remote State with S3 + DynamoDB**
-- **Decision**: Use S3 for state storage and DynamoDB for state locking
-- **Rationale**: Enables team collaboration, prevents concurrent modifications, provides state versioning for rollback, and is the industry standard for Terraform state management.
-- **Trade-offs**: Additional AWS resources to manage, but essential for multi-user environments.
+**2. Remote State with S3 Native Locking**
+- **Decision**: Use S3 for state storage with native locking instead of DynamoDB
+- **Rationale**: Simplifies infrastructure by eliminating DynamoDB table, reduces costs, and S3 native locking is sufficient for POC collaboration needs. Automatic lock expiration prevents stale lock issues.
+- **Trade-offs**: Slightly newer feature (requires Terraform >= 1.5), but simpler and more cost-effective than S3 + DynamoDB approach.
 
-**3. OpenSearch Serverless for Vector Store**
-- **Decision**: Use OpenSearch Serverless instead of self-managed OpenSearch or alternative vector databases
-- **Rationale**: Native integration with Bedrock Knowledge Base, automatic scaling, no infrastructure management, and built-in high availability.
-- **Trade-offs**: Higher cost than self-managed options, but significantly reduced operational overhead for POC.
+**3. S3 for Vector Store**
+- **Decision**: Use S3 as the vector store instead of OpenSearch Serverless or other vector databases
+- **Rationale**: Simplest integration with Bedrock Knowledge Base, lowest cost for POC, no additional infrastructure to manage, and sufficient for development/testing workloads.
+- **Trade-offs**: May have higher latency than dedicated vector databases, but acceptable for POC validation. Can migrate to OpenSearch Serverless or other vector stores for production if needed.
 
 **4. VPC Optional for Development, Mandatory for Production**
 - **Decision**: Make VPC deployment optional via `enable_vpc` variable, but enforce for production
@@ -882,8 +882,8 @@ func TestIAMPoliciesFollowLeastPrivilege(t *testing.T) {
 - AWS Provider >= 5.0.0
 - Required provider features:
   - `aws_bedrockagent_agent` resource
-  - `aws_bedrockagent_knowledge_base` resource
-  - `aws_opensearchserverless_collection` resource
+  - `aws_bedrockagent_knowledge_base` resource with S3 vector store support
+  - `aws_s3_bucket` resource
 
 ### Agent Preparation Workaround
 
@@ -911,67 +911,93 @@ resource "time_sleep" "agent_prepare_wait" {
 }
 ```
 
-### OpenSearch Serverless Overview
+### S3 Vector Store Overview
 
-**What is OpenSearch Serverless?**
+**What is S3 Vector Store?**
 
-OpenSearch Serverless is a fully managed, serverless deployment option for Amazon OpenSearch Service. Unlike traditional OpenSearch clusters where you provision and manage instances, OpenSearch Serverless automatically scales compute and storage resources based on your workload demands.
+Amazon Bedrock Knowledge Base supports using S3 as a vector store, which is the simplest and most cost-effective option for POC and development environments. Instead of requiring a dedicated vector database like OpenSearch Serverless, Bedrock can store and retrieve vector embeddings directly from S3.
 
 **Key Characteristics**:
-- **No Infrastructure Management**: No need to provision, configure, or manage OpenSearch clusters
-- **Automatic Scaling**: Compute capacity scales up and down automatically based on workload
-- **Pay-per-Use**: You pay only for the resources consumed, not for idle capacity
-- **High Availability**: Built-in redundancy across multiple Availability Zones
-- **Vector Search Support**: Native support for k-NN vector search, ideal for RAG applications
+- **No Additional Infrastructure**: Uses standard S3 buckets, no specialized services required
+- **Cost-Effective**: Only pay for S3 storage and API requests, no compute charges
+- **Simple Setup**: Minimal configuration compared to vector databases
+- **Suitable for POC**: Perfect for development, testing, and proof-of-concept workloads
+- **Easy Migration Path**: Can migrate to OpenSearch Serverless or other vector stores later if needed
 
-**Why Use OpenSearch Serverless for Bedrock Knowledge Base?**
+**How S3 Vector Store Works with Bedrock Knowledge Base**:
 
-Bedrock Knowledge Base uses OpenSearch Serverless as a vector store to:
-1. Store vector embeddings generated from your documents
-2. Perform semantic similarity searches when users query the agent
-3. Retrieve relevant document chunks to augment the agent's responses
-4. Scale automatically as your document corpus grows
+1. **Document Ingestion**: When you upload documents to the source S3 bucket, Bedrock processes them
+2. **Embedding Generation**: Bedrock uses the specified embedding model to generate vector embeddings
+3. **Vector Storage**: Embeddings are stored in the designated S3 vector bucket
+4. **Semantic Search**: When users query, Bedrock retrieves relevant vectors from S3
+5. **Context Retrieval**: Matching document chunks are returned to augment agent responses
 
-**Collection Types**:
-- **VECTORSEARCH**: Optimized for vector similarity search (used for Bedrock Knowledge Base)
-- **TIMESERIES**: Optimized for time-series data and log analytics
-- **SEARCH**: General-purpose search and analytics
-
-### OpenSearch Serverless Configuration
-
-OpenSearch Serverless requires three types of policies:
-1. **Encryption Policy**: Defines encryption settings (AWS-managed or customer-managed KMS keys)
-2. **Network Policy**: Controls network access (public or VPC-only access)
-3. **Data Access Policy**: Grants permissions to principals (IAM roles, users) for data operations
-
-These policies must be created before the collection and properly configured for Bedrock access.
-
-**Security Model**:
-- Bedrock Knowledge Base needs `aoss:APIAccessAll` permission on the collection
-- The Knowledge Base IAM role must be granted access through the data access policy
-- Network policy should allow access from Bedrock service endpoints
+**Configuration Requirements**:
+- **Two S3 Buckets**: One for source documents, one for vector storage
+- **IAM Permissions**: Knowledge Base role needs read access to documents bucket and read/write access to vector bucket
+- **Encryption**: Both buckets should have encryption enabled
+- **Versioning**: Enable versioning for data protection and rollback capability
 
 **Cost Considerations**:
-- OpenSearch Serverless charges based on:
-  - **OpenSearch Compute Units (OCUs)**: Compute capacity for indexing and search
-  - **Storage**: Amount of data stored in the collection
-- Minimum: 2 OCUs for indexing + 2 OCUs for search (4 OCUs total)
-- Development: Can use smaller capacity with standby replicas disabled
-- Production: Enable standby replicas for high availability (increases cost)
+- **S3 Storage**: Pay only for data stored (documents + vectors)
+- **S3 API Requests**: Charges for PUT/GET operations during ingestion and queries
+- **No Compute Costs**: Unlike OpenSearch Serverless, no OCU charges
+- **Typical POC Cost**: Very low, usually under $10/month for small document sets
+
+**When to Use S3 vs OpenSearch Serverless**:
+
+Use S3 Vector Store when:
+- Building POC or development environments
+- Working with small to medium document sets (< 10,000 documents)
+- Cost optimization is a priority
+- Simple setup is preferred
+- Query latency requirements are moderate (< 1 second acceptable)
+
+Consider OpenSearch Serverless when:
+- Production workloads with high query volume
+- Large document sets (> 10,000 documents)
+- Sub-second query latency required
+- Advanced vector search features needed
+- High availability and redundancy critical
 
 ### Cost Optimization
 
 **Development Environment**:
 - Use single NAT gateway instead of multi-AZ
 - Disable VPC endpoints (use public internet)
-- Use smaller OpenSearch Serverless capacity
-- Implement S3 lifecycle policies for old documents
+- Use S3 vector store for lowest cost
+- Implement S3 lifecycle policies for old documents and vectors
 
 **Production Environment**:
 - Multi-AZ NAT gateways for high availability
 - VPC endpoints to reduce data transfer costs
-- Enable OpenSearch Serverless standby replicas
+- Consider migrating to OpenSearch Serverless for better performance
 - Monitor Bedrock API usage and optimize queries
+- Enable S3 Intelligent-Tiering for cost optimization
+
+### Backend Configuration
+
+The backend configuration uses S3 with native locking. Here's the configuration format:
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket = "your-terraform-state-bucket"
+    key    = "bedrock-infrastructure/terraform.tfstate"
+    region = "us-east-1"
+    encrypt = true
+    
+    # S3 native locking is enabled automatically when using S3 backend
+    # No DynamoDB table required
+  }
+}
+```
+
+**S3 Native Locking**:
+- Terraform automatically uses S3's conditional write operations for locking
+- No additional configuration needed beyond the S3 backend
+- Locks are stored as metadata on the state object
+- Automatic lock expiration prevents stale locks
 
 ### Deployment Workflow
 
@@ -983,7 +1009,7 @@ These policies must be created before the collection and properly configured for
    ```
 
 2. **Configure Backend** (one-time):
-   Update `backend.tf` with state bucket and DynamoDB table names
+   Update `backend.tf` with state bucket name
 
 3. **Deploy Environment**:
    ```bash
@@ -1019,10 +1045,11 @@ These policies must be created before the collection and properly configured for
 - Apply changes during maintenance window
 - Test agent functionality after update
 
-**Scaling OpenSearch**:
-- OpenSearch Serverless scales automatically
-- Monitor capacity metrics in CloudWatch
-- Adjust standby replicas for production workload
+**Scaling Vector Storage**:
+- S3 scales automatically with no configuration needed
+- Monitor S3 storage metrics and request rates in CloudWatch
+- Consider migrating to OpenSearch Serverless if query latency becomes an issue
+- Implement S3 lifecycle policies to archive old vectors if needed
 
 **Rotating IAM Credentials**:
 - Use IAM roles instead of access keys

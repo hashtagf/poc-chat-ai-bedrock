@@ -1,0 +1,57 @@
+{
+  "agent_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:bedrock:ap-southeast-1:315183407016:agent/BOBWFRKRH5"
+  },
+  "agent_role_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:iam::315183407016:role/bedrock-chat-poc-agent-role-dev"
+  },
+  "aws_region": {
+    "sensitive": false,
+    "type": "string",
+    "value": "ap-southeast-1"
+  },
+  "bedrock_agent_alias_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "SR8UINA7VP"
+  },
+  "bedrock_agent_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "BOBWFRKRH5"
+  },
+  "bedrock_knowledge_base_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": ""
+  },
+  "data_source_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": ""
+  },
+  "kb_role_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:iam::315183407016:role/bedrock-chat-poc-kb-role-dev"
+  },
+  "knowledge_base_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": ""
+  },
+  "s3_bucket_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "bedrock-chat-poc-kb-docs-dev"
+  },
+  "s3_vector_bucket_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "bedrock-chat-poc-kb-vectors-dev"
+  }
+}

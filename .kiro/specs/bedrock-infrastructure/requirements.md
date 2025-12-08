@@ -32,16 +32,17 @@ This document specifies the requirements for provisioning Amazon Bedrock infrast
 
 ### Requirement 2
 
-**User Story:** As a DevOps engineer, I want to provision a Knowledge Base with S3 data source, so that the Bedrock Agent can retrieve context from uploaded documents.
+**User Story:** As a DevOps engineer, I want to provision a Knowledge Base with S3 data source and S3 vector store, so that the Bedrock Agent can retrieve context from uploaded documents.
 
 #### Acceptance Criteria
 
 1. WHEN Terraform is applied THEN the system SHALL create an S3 bucket for storing knowledge base documents
-2. WHEN the S3 bucket is created THEN the system SHALL enable versioning and encryption at rest
-3. WHEN the Knowledge Base is created THEN the system SHALL configure it with an embedding model for vector generation
-4. WHEN the Knowledge Base is created THEN the system SHALL connect it to an OpenSearch Serverless collection for vector storage
-5. WHEN the Knowledge Base is created THEN the system SHALL configure an S3 data source pointing to the created bucket
-6. WHEN Terraform outputs are generated THEN the system SHALL export the Knowledge Base ID for application configuration
+2. WHEN Terraform is applied THEN the system SHALL create an S3 bucket for storing vector embeddings
+3. WHEN the S3 buckets are created THEN the system SHALL enable versioning and encryption at rest on both buckets
+4. WHEN the Knowledge Base is created THEN the system SHALL configure it with an embedding model for vector generation
+5. WHEN the Knowledge Base is created THEN the system SHALL configure it to use S3 as the vector store
+6. WHEN the Knowledge Base is created THEN the system SHALL configure an S3 data source pointing to the documents bucket
+7. WHEN Terraform outputs are generated THEN the system SHALL export the Knowledge Base ID for application configuration
 
 ### Requirement 3
 
@@ -50,8 +51,8 @@ This document specifies the requirements for provisioning Amazon Bedrock infrast
 #### Acceptance Criteria
 
 1. WHEN the Agent IAM role is created THEN the system SHALL grant permissions to invoke the specified foundation model
-2. WHEN the Knowledge Base IAM role is created THEN the system SHALL grant permissions to read from the S3 bucket
-3. WHEN the Knowledge Base IAM role is created THEN the system SHALL grant permissions to write vectors to the OpenSearch collection
+2. WHEN the Knowledge Base IAM role is created THEN the system SHALL grant permissions to read from the S3 documents bucket
+3. WHEN the Knowledge Base IAM role is created THEN the system SHALL grant permissions to read and write to the S3 vector bucket
 4. WHEN the Knowledge Base IAM role is created THEN the system SHALL grant permissions to invoke the embedding model
 5. WHEN IAM policies are created THEN the system SHALL follow the principle of least privilege
 
@@ -62,7 +63,7 @@ This document specifies the requirements for provisioning Amazon Bedrock infrast
 #### Acceptance Criteria
 
 1. WHEN Terraform is initialized THEN the system SHALL store state in an S3 bucket
-2. WHEN Terraform operations are performed THEN the system SHALL use DynamoDB for state locking
+2. WHEN Terraform operations are performed THEN the system SHALL use S3 native locking for state locking
 3. WHEN state is stored THEN the system SHALL enable encryption at rest for the state bucket
 4. WHEN state is stored THEN the system SHALL enable versioning on the state bucket for rollback capability
 
