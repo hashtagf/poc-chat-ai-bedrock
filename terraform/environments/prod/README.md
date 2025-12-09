@@ -17,7 +17,7 @@ The production environment includes additional security and high-availability fe
 The production environment includes:
 
 - **VPC**: 10.0.0.0/16 CIDR block
-- **Private Subnets**: 10.0.1.0/24, 10.0.2.0/24 (across us-east-1a, us-east-1b)
+- **Private Subnets**: 10.0.1.0/24, 10.0.2.0/24 (across ap-southeast-1a, ap-southeast-1b)
 - **Public Subnets**: 10.0.101.0/24, 10.0.102.0/24 (for NAT gateways)
 - **VPC Endpoints**:
   - Bedrock Agent Runtime (interface endpoint with private DNS)

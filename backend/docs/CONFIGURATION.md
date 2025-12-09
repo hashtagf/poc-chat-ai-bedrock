@@ -43,7 +43,7 @@ The application uses environment variables for configuration with sensible defau
    ```bash
    # Minimal development setup (mock mode)
    ENVIRONMENT=development
-   AWS_REGION=us-east-1
+   AWS_REGION=ap-southeast-1
    ```
 
 3. Run the server:
@@ -56,7 +56,7 @@ The application uses environment variables for configuration with sensible defau
 1. Set Bedrock credentials in `.env`:
    ```bash
    ENVIRONMENT=development
-   AWS_REGION=us-east-1
+   AWS_REGION=ap-southeast-1
    BEDROCK_AGENT_ID=your_agent_id
    BEDROCK_AGENT_ALIAS_ID=your_alias_id
    ```
@@ -84,7 +84,7 @@ The application uses environment variables for configuration with sensible defau
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `AWS_REGION` | AWS region | `us-east-1` | Yes |
+| `AWS_REGION` | AWS region | `ap-southeast-1` | Yes |
 | `AWS_ACCESS_KEY_ID` | AWS access key | - | No* |
 | `AWS_SECRET_ACCESS_KEY` | AWS secret key | - | No* |
 | `AWS_SESSION_TOKEN` | AWS session token | - | No |
@@ -179,7 +179,7 @@ export $(cat backend/config/production.env | grep -v '^#' | xargs)
 
 ```bash
 export ENVIRONMENT=test
-export AWS_REGION=us-east-1
+export AWS_REGION=ap-southeast-1
 go test ./...
 ```
 
@@ -253,14 +253,14 @@ go run cmd/server/main.go
 **Minimal (Mock Mode):**
 ```bash
 ENVIRONMENT=development
-AWS_REGION=us-east-1
+AWS_REGION=ap-southeast-1
 # No Bedrock IDs - runs in mock mode
 ```
 
 **With Bedrock:**
 ```bash
 ENVIRONMENT=development
-AWS_REGION=us-east-1
+AWS_REGION=ap-southeast-1
 BEDROCK_AGENT_ID=ABCDEFGHIJ
 BEDROCK_AGENT_ALIAS_ID=TSTALIASID
 ```
@@ -268,7 +268,7 @@ BEDROCK_AGENT_ALIAS_ID=TSTALIASID
 **With Knowledge Base:**
 ```bash
 ENVIRONMENT=production
-AWS_REGION=us-east-1
+AWS_REGION=ap-southeast-1
 BEDROCK_AGENT_ID=ABCDEFGHIJ
 BEDROCK_AGENT_ALIAS_ID=PRODALIASID
 BEDROCK_KNOWLEDGE_BASE_ID=KB123456

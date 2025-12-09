@@ -1,0 +1,27 @@
+Amazon Bedrock Knowledge Base Test Document
+
+This is a test document for validating the S3 Vectors ingestion workflow.
+
+Key Information:
+- Amazon Bedrock is a fully managed service that offers foundation models from leading AI companies.
+- Knowledge Bases for Amazon Bedrock enable retrieval-augmented generation (RAG) workflows.
+- S3 Vectors storage provides cost-effective vector embeddings storage compared to OpenSearch Serverless.
+- The typical cost for S3 Vectors is $5-10 per month versus $700 per month for OpenSearch Serverless.
+- Vector embeddings are generated using models like Amazon Titan Embeddings G1.
+- The Titan Embeddings G1 model produces 1536-dimensional vectors.
+- Cosine distance metric is commonly used for semantic similarity calculations.
+
+Technical Details:
+- S3 Vectors uses standard S3 buckets with server-side encryption (AES-256).
+- Vector indices are created with specific configurations for dimension, data type, and distance metric.
+- The ingestion process converts documents into vector embeddings and stores them in S3.
+- Queries use semantic search to find relevant document chunks based on vector similarity.
+
+Benefits of S3 Vectors:
+1. Cost savings: 99% reduction compared to OpenSearch Serverless
+2. Seamless integration with Amazon Bedrock
+3. No infrastructure management required
+4. Sub-second query latency
+5. Automatic scaling based on usage
+
+This document should be successfully ingested and converted into vector embeddings for semantic search.

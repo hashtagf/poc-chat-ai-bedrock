@@ -53,7 +53,7 @@ This document provides instructions for running the Chat UI application using Do
 ### Required AWS Configuration
 
 ```bash
-AWS_REGION=us-east-1                    # AWS region for Bedrock
+AWS_REGION=ap-southeast-1                    # AWS region for Bedrock
 AWS_ACCESS_KEY_ID=<your-key>            # AWS access key (dev only)
 AWS_SECRET_ACCESS_KEY=<your-secret>     # AWS secret key (dev only)
 ```

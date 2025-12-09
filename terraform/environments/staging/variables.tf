@@ -19,11 +19,11 @@ variable "project_name" {
 variable "aws_region" {
   description = "AWS region for resource deployment"
   type        = string
-  default     = "us-east-1"
+  default     = "ap-southeast-1"
 
   validation {
     condition     = can(regex("^[a-z]{2}-[a-z]+-[0-9]{1}$", var.aws_region))
-    error_message = "AWS region must match the pattern: us-east-1, eu-west-1, etc."
+    error_message = "AWS region must match the pattern: ap-southeast-1, eu-west-1, etc."
   }
 }
 

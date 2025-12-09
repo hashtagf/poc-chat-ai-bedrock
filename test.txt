@@ -1,0 +1,1 @@
+S3 Vectors provides cost-effective vector storage for Amazon Bedrock.

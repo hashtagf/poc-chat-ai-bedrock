@@ -74,7 +74,7 @@ docker-compose --env-file backend/config/development.env up
 ### AWS Configuration
 
 - `AWS_REGION` - AWS region for Bedrock services
-  - Default: `us-east-1`
+  - Default: `ap-southeast-1`
   - Required: Yes
 - `AWS_ACCESS_KEY_ID` - AWS access key (development only)
   - Default: empty
@@ -183,7 +183,7 @@ Configuration is automatically validated on load. The following validations are 
 ```bash
 export ENVIRONMENT=development
 export SERVER_PORT=8080
-export AWS_REGION=us-east-1
+export AWS_REGION=ap-southeast-1
 # Leave BEDROCK_AGENT_ID empty to run in mock mode
 ```
 
@@ -192,7 +192,7 @@ export AWS_REGION=us-east-1
 ```bash
 export ENVIRONMENT=production
 export SERVER_PORT=8080
-export AWS_REGION=us-east-1
+export AWS_REGION=ap-southeast-1
 export BEDROCK_AGENT_ID=ABCDEFGHIJ
 export BEDROCK_AGENT_ALIAS_ID=TSTALIASID
 export BEDROCK_KNOWLEDGE_BASE_ID=KB123456

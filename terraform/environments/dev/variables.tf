@@ -19,11 +19,11 @@ variable "project_name" {
 variable "aws_region" {
   description = "AWS region for resource deployment"
   type        = string
-  default     = "us-east-1"
+  default     = "ap-southeast-1"
 
   validation {
     condition     = can(regex("^[a-z]{2}-[a-z]+-[0-9]{1}$", var.aws_region))
-    error_message = "AWS region must match the pattern: us-east-1, eu-west-1, etc."
+    error_message = "AWS region must match the pattern: ap-southeast-1, eu-west-1, etc."
   }
 }
 
@@ -56,30 +56,8 @@ variable "idle_session_ttl" {
 }
 
 # Knowledge Base Configuration
-variable "knowledge_base_name" {
-  description = "Name of the Knowledge Base"
-  type        = string
-}
-
-variable "embedding_model" {
-  description = "Embedding model ID (e.g., amazon.titan-embed-text-v1)"
-  type        = string
-
-  validation {
-    condition     = can(regex("^[a-z]+\\.", var.embedding_model))
-    error_message = "Embedding model ID must start with provider name (e.g., amazon., cohere.)."
-  }
-}
-
-variable "s3_bucket_name" {
-  description = "Name of the S3 bucket for knowledge base documents"
-  type        = string
-}
-
-variable "s3_vector_bucket_name" {
-  description = "Name of the S3 bucket for vector storage"
-  type        = string
-}
+# Note: Knowledge Base is now fully managed by Terraform
+# No manual variables needed - module creates everything automatically
 
 # VPC Configuration (disabled for dev)
 variable "enable_vpc" {

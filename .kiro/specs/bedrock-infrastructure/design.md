@@ -314,7 +314,7 @@ Knowledge Base Role Permissions:
 **Inputs**:
 - `vpc_name` (string): Name of the VPC
 - `vpc_cidr` (string): CIDR block for VPC (e.g., "10.0.0.0/16")
-- `availability_zones` (list): List of AZs (e.g., ["us-east-1a", "us-east-1b"])
+- `availability_zones` (list): List of AZs (e.g., ["ap-southeast-1a", "ap-southeast-1b"])
 - `private_subnet_cidrs` (list): CIDR blocks for private subnets
 - `public_subnet_cidrs` (list): CIDR blocks for public subnets
 - `enable_nat_gateway` (bool): Enable NAT gateway for internet access (default: true)
@@ -360,14 +360,14 @@ S3 Endpoint:
 When VPC is enabled, the application must be configured to use VPC endpoints:
 
 1. **Deploy Application in Private Subnets**: The Go backend should run in the same VPC's private subnets
-2. **Use Private DNS**: With private DNS enabled, the application uses standard AWS SDK endpoints (e.g., `bedrock-agent-runtime.us-east-1.amazonaws.com`) which automatically resolve to the VPC endpoint
+2. **Use Private DNS**: With private DNS enabled, the application uses standard AWS SDK endpoints (e.g., `bedrock-agent-runtime.ap-southeast-1.amazonaws.com`) which automatically resolve to the VPC endpoint
 3. **Security Group Configuration**: Application security group must allow outbound HTTPS to VPC endpoint security group
 4. **No Code Changes Required**: AWS SDK automatically uses VPC endpoints when private DNS is enabled
 
 **Environment Variable Configuration**:
 ```bash
 # No special endpoint configuration needed when using VPC endpoints with private DNS
-AWS_REGION=us-east-1
+AWS_REGION=ap-southeast-1
 BEDROCK_AGENT_ID=<from terraform output>
 BEDROCK_AGENT_ALIAS_ID=<from terraform output>
 # SDK automatically routes through VPC endpoints
@@ -455,7 +455,7 @@ Result: Sequential execution, no conflicts
 # General
 environment     = "dev"
 project_name    = "bedrock-chat-poc"
-aws_region      = "us-east-1"
+aws_region      = "ap-southeast-1"
 
 # Bedrock Agent
 agent_name           = "bedrock-chat-poc-agent-dev"
@@ -486,7 +486,7 @@ tags = {
 # General
 environment     = "prod"
 project_name    = "bedrock-chat-poc"
-aws_region      = "us-east-1"
+aws_region      = "ap-southeast-1"
 
 # Bedrock Agent
 agent_name           = "bedrock-chat-poc-agent-prod"
@@ -503,7 +503,7 @@ s3_vector_bucket_name       = "bedrock-chat-poc-kb-vectors-prod"
 # VPC (enabled for prod)
 enable_vpc              = true
 vpc_cidr                = "10.0.0.0/16"
-availability_zones      = ["us-east-1a", "us-east-1b"]
+availability_zones      = ["ap-southeast-1a", "ap-southeast-1b"]
 private_subnet_cidrs    = ["10.0.1.0/24", "10.0.2.0/24"]
 public_subnet_cidrs     = ["10.0.101.0/24", "10.0.102.0/24"]
 enable_nat_gateway      = true
@@ -984,7 +984,7 @@ terraform {
   backend "s3" {
     bucket = "your-terraform-state-bucket"
     key    = "bedrock-infrastructure/terraform.tfstate"
-    region = "us-east-1"
+    region = "ap-southeast-1"
     encrypt = true
     
     # S3 native locking is enabled automatically when using S3 backend

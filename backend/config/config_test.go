@@ -39,7 +39,7 @@ func TestLoad(t *testing.T) {
 			envVars: map[string]string{
 				"ENVIRONMENT": "development",
 				"SERVER_PORT": "8080",
-				"AWS_REGION":  "us-east-1",
+				"AWS_REGION":  "ap-southeast-1",
 			},
 			wantErr: false,
 		},
@@ -48,7 +48,7 @@ func TestLoad(t *testing.T) {
 			envVars: map[string]string{
 				"ENVIRONMENT":            "production",
 				"SERVER_PORT":            "8080",
-				"AWS_REGION":             "us-east-1",
+				"AWS_REGION":             "ap-southeast-1",
 				"BEDROCK_AGENT_ID":       "test-agent-id",
 				"BEDROCK_AGENT_ALIAS_ID": "test-alias-id",
 			},
@@ -59,7 +59,7 @@ func TestLoad(t *testing.T) {
 			envVars: map[string]string{
 				"ENVIRONMENT": "production",
 				"SERVER_PORT": "8080",
-				"AWS_REGION":  "us-east-1",
+				"AWS_REGION":  "ap-southeast-1",
 			},
 			wantErr: true,
 		},
@@ -68,7 +68,7 @@ func TestLoad(t *testing.T) {
 			envVars: map[string]string{
 				"ENVIRONMENT": "invalid",
 				"SERVER_PORT": "8080",
-				"AWS_REGION":  "us-east-1",
+				"AWS_REGION":  "ap-southeast-1",
 			},
 			wantErr: true,
 		},
@@ -114,7 +114,7 @@ func TestConfig_Validate(t *testing.T) {
 					Host: "0.0.0.0",
 				},
 				AWS: AWSConfig{
-					Region: "us-east-1",
+					Region: "ap-southeast-1",
 				},
 				WebSocket: WebSocketConfig{
 					Timeout:    30 * time.Second,
@@ -134,7 +134,7 @@ func TestConfig_Validate(t *testing.T) {
 					Port: "8080",
 				},
 				AWS: AWSConfig{
-					Region: "us-east-1",
+					Region: "ap-southeast-1",
 				},
 				WebSocket: WebSocketConfig{
 					Timeout:    30 * time.Second,
@@ -154,7 +154,7 @@ func TestConfig_Validate(t *testing.T) {
 					Port: "",
 				},
 				AWS: AWSConfig{
-					Region: "us-east-1",
+					Region: "ap-southeast-1",
 				},
 				WebSocket: WebSocketConfig{
 					Timeout:    30 * time.Second,
@@ -194,7 +194,7 @@ func TestConfig_Validate(t *testing.T) {
 					Port: "8080",
 				},
 				AWS: AWSConfig{
-					Region: "us-east-1",
+					Region: "ap-southeast-1",
 				},
 				WebSocket: WebSocketConfig{
 					Timeout:    0,
@@ -214,7 +214,7 @@ func TestConfig_Validate(t *testing.T) {
 					Port: "8080",
 				},
 				AWS: AWSConfig{
-					Region: "us-east-1",
+					Region: "ap-southeast-1",
 				},
 				Bedrock: BedrockConfig{
 					AgentID:      "",

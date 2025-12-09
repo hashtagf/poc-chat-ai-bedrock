@@ -8,7 +8,9 @@
       ],
       "env": {},
       "disabled": false,
-      "autoApprove": []
+      "autoApprove": [
+        "fetch"
+      ]
     },
     "aws-knowledge-mcp-server": {
       "url": "https://knowledge-mcp.global.api.aws",
@@ -18,7 +20,8 @@
         "aws___search_documentation",
         "aws___search_documentation",
         "aws___search_documentation",
-        "aws___read_documentation"
+        "aws___read_documentation",
+        "aws___get_regional_availability"
       ]
     },
     "awslabs.aws-documentation-mcp-server": {
@@ -42,9 +45,10 @@
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
-        "SearchAwsProviderDocs"
+        "SearchAwsProviderDocs",
+        "SearchAwsccProviderDocs"
       ]
     }
   }

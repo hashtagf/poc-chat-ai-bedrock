@@ -25,7 +25,7 @@ The environment is configured through `terraform.tfvars`:
 ```hcl
 environment  = "dev"
 project_name = "bedrock-chat-poc"
-aws_region   = "us-east-1"
+aws_region   = "ap-southeast-1"
 
 agent_name        = "bedrock-chat-poc-agent-dev"
 foundation_model  = "anthropic.claude-v2"
@@ -56,7 +56,7 @@ terraform {
   backend "s3" {
     bucket = "bedrock-chat-poc-terraform-state"  # Update this
     key    = "environments/dev/terraform.tfstate"
-    region = "us-east-1"
+    region = "ap-southeast-1"
     encrypt = true
   }
 }
@@ -103,7 +103,7 @@ bedrock_agent_id         = "ABCDEFGHIJ"
 bedrock_agent_alias_id   = "TSTALIASID"
 bedrock_knowledge_base_id = "KBID123456"
 s3_bucket_name           = "bedrock-chat-poc-kb-docs-dev"
-aws_region               = "us-east-1"
+aws_region               = "ap-southeast-1"
 ```
 
 ### Configure Backend Application
@@ -148,7 +148,7 @@ DS_ID=$(terraform output -raw data_source_id)
 aws bedrock-agent start-ingestion-job \
   --knowledge-base-id $KB_ID \
   --data-source-id $DS_ID \
-  --region us-east-1
+  --region ap-southeast-1
 ```
 
 Monitor the ingestion job status:
@@ -157,7 +157,7 @@ Monitor the ingestion job status:
 aws bedrock-agent list-ingestion-jobs \
   --knowledge-base-id $KB_ID \
   --data-source-id $DS_ID \
-  --region us-east-1
+  --region ap-southeast-1
 ```
 
 ## Maintenance
@@ -202,7 +202,7 @@ The agent requires a preparation step after creation. If this fails:
 # Manually prepare the agent
 aws bedrock-agent prepare-agent \
   --agent-id $(terraform output -raw bedrock_agent_id) \
-  --region us-east-1
+  --region ap-southeast-1
 ```
 
 ### Permission Errors

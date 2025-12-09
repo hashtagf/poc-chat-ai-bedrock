@@ -1,0 +1,52 @@
+[0m[1mmodule.iam.aws_iam_role.agent_role: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.aws_iam_role.knowledge_base: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.aws_s3_bucket.documents: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.aws_s3vectors_vector_bucket.vectors: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.aws_s3vectors_vector_bucket.vectors: Creation complete after 0s[0m
+[0m[1mmodule.knowledge_base.aws_s3vectors_index.main: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.aws_s3vectors_index.main: Creation complete after 1s[0m
+[0m[1mmodule.iam.aws_iam_role.agent_role: Creation complete after 2s [id=bedrock-chat-poc-agent-role-dev][0m
+[0m[1mmodule.knowledge_base.aws_iam_role.knowledge_base: Creation complete after 2s [id=bedrock-chat-poc-kb-role-dev][0m
+[0m[1mmodule.iam.aws_iam_role_policy.agent_policy: Creating...[0m[0m
+[0m[1mmodule.bedrock_agent.aws_bedrockagent_agent.this: Creating...[0m[0m
+[0m[1mmodule.iam.aws_iam_role_policy.agent_policy: Creation complete after 0s [id=bedrock-chat-poc-agent-role-dev:bedrock-chat-poc-agent-policy-dev][0m
+[0m[1mmodule.knowledge_base.aws_s3_bucket.documents: Creation complete after 3s [id=bedrock-chat-poc-kb-docs-dev][0m
+[0m[1mmodule.knowledge_base.aws_s3_bucket_versioning.documents: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.aws_iam_role_policy.knowledge_base: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.aws_s3_bucket_server_side_encryption_configuration.documents: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.aws_s3_bucket_server_side_encryption_configuration.documents: Creation complete after 1s [id=bedrock-chat-poc-kb-docs-dev][0m
+[0m[1mmodule.knowledge_base.aws_iam_role_policy.knowledge_base: Creation complete after 1s [id=bedrock-chat-poc-kb-role-dev:bedrock-chat-poc-kb-policy-dev][0m
+[0m[1mmodule.knowledge_base.awscc_bedrock_knowledge_base.main: Creating...[0m[0m
+[0m[1mmodule.bedrock_agent.aws_bedrockagent_agent.this: Creation complete after 3s [id=VQCHNVBKMZ][0m
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation: Creating...[0m[0m
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation: Provisioning with 'local-exec'...[0m[0m
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation (local-exec):[0m [0mExecuting: ["/bin/sh" "-c" "aws bedrock-agent prepare-agent --agent-id VQCHNVBKMZ"]
+[0m[1mmodule.knowledge_base.aws_s3_bucket_versioning.documents: Creation complete after 2s [id=bedrock-chat-poc-kb-docs-dev][0m
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation (local-exec):[0m [0m{
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation (local-exec):[0m [0m    "agentId": "VQCHNVBKMZ",
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation (local-exec):[0m [0m    "agentStatus": "PREPARING",
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation (local-exec):[0m [0m    "agentVersion": "DRAFT",
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation (local-exec):[0m [0m    "preparedAt": "2025-12-09T14:55:28.002773+00:00"
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation (local-exec):[0m [0m}
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation: Creation complete after 1s [id=764bd370-72a9-ea5c-e1b5-73adc116d69f][0m
+[0m[1mmodule.bedrock_agent.time_sleep.agent_initialization: Creating...[0m[0m
+[0m[1mmodule.bedrock_agent.time_sleep.agent_initialization: Still creating... [00m10s elapsed][0m[0m
+[0m[1mmodule.bedrock_agent.time_sleep.agent_initialization: Still creating... [00m20s elapsed][0m[0m
+[0m[1mmodule.bedrock_agent.time_sleep.agent_initialization: Still creating... [00m30s elapsed][0m[0m
+[0m[1mmodule.bedrock_agent.time_sleep.agent_initialization: Creation complete after 30s [id=2025-12-09T14:55:58Z][0m
+[0m[1mmodule.bedrock_agent.aws_bedrockagent_agent_alias.draft: Creating...[0m[0m
+[0m[1mmodule.bedrock_agent.aws_bedrockagent_agent_alias.draft: Creation complete after 4s [id=I1DACDN18K,VQCHNVBKMZ][0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mAWS SDK Go Service Operation Incomplete[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with module.knowledge_base.awscc_bedrock_knowledge_base.main,
+[31m│[0m [0m  on ../../modules/knowledge-base/main.tf line 154, in resource "awscc_bedrock_knowledge_base" "main":
+[31m│[0m [0m 154: resource "awscc_bedrock_knowledge_base" "main" [4m{[0m[0m
+[31m│[0m [0m
+[31m│[0m [0mWaiting for Cloud Control API service CreateResource operation completion
+[31m│[0m [0mreturned: waiter state transitioned to FAILED. StatusMessage: Bedrock
+[31m│[0m [0mKnowledge Base was unable to assume the given role. Provide the proper
+[31m│[0m [0mpermissions and retry the request. (Service: BedrockAgent, Status Code:
+[31m│[0m [0m400, Request ID: 00bd192d-2b1b-4846-b75f-0fd2ffd6c07b) (SDK Attempt Count:
+[31m│[0m [0m1). ErrorCode: InvalidRequest
+[31m╵[0m[0m

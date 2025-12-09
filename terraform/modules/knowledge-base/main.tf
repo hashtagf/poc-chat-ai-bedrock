@@ -1,30 +1,42 @@
-# Get current AWS region
-data "aws_region" "current" {}
-
-# S3 Bucket for Knowledge Base Documents
-resource "aws_s3_bucket" "kb_documents" {
-  bucket = var.s3_bucket_name
-
-  tags = merge(
-    var.tags,
-    {
-      Name = var.s3_bucket_name
+# AWS Provider 6.25.0+ is required for S3 Vectors resources (aws_s3vectors_vector_bucket, aws_s3vectors_index).
+# AWSCC provider is still required for aws_bedrockagent_knowledge_base with S3_VECTORS storage type
+# as the AWS provider doesn't yet support S3 Vectors configuration in knowledge bases.
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 6.25.0"
     }
-  )
+    awscc = {
+      source  = "hashicorp/awscc"
+      version = ">= 1.0.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
+  }
 }
 
-# Enable versioning on documents bucket
-resource "aws_s3_bucket_versioning" "kb_documents" {
-  bucket = aws_s3_bucket.kb_documents.id
+# S3 bucket for documents
+resource "aws_s3_bucket" "documents" {
+  bucket = "${var.project_name}-docs-${var.environment}-${substr(md5("${var.project_name}-${var.environment}"), 0, 8)}"
+
+  tags = merge(var.tags, {
+    Name = "${var.project_name}-docs-${var.environment}"
+  })
+}
+
+resource "aws_s3_bucket_versioning" "documents" {
+  bucket = aws_s3_bucket.documents.id
 
   versioning_configuration {
     status = "Enabled"
   }
 }
 
-# Enable encryption on documents bucket
-resource "aws_s3_bucket_server_side_encryption_configuration" "kb_documents" {
-  bucket = aws_s3_bucket.kb_documents.id
+resource "aws_s3_bucket_server_side_encryption_configuration" "documents" {
+  bucket = aws_s3_bucket.documents.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -33,185 +45,173 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "kb_documents" {
   }
 }
 
-# Block public access to documents bucket
-resource "aws_s3_bucket_public_access_block" "kb_documents" {
-  bucket = aws_s3_bucket.kb_documents.id
+# S3 Vectors bucket using AWS provider (6.25.0+)
+resource "aws_s3vectors_vector_bucket" "vectors" {
+  vector_bucket_name = "${var.project_name}-vec-${var.environment}"
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-# S3 Bucket for Vector Storage
-resource "aws_s3_bucket" "kb_vectors" {
-  bucket = var.s3_vector_bucket_name
-
-  tags = merge(
-    var.tags,
-    {
-      Name = var.s3_vector_bucket_name
-    }
-  )
-}
-
-# Enable versioning on vector bucket
-resource "aws_s3_bucket_versioning" "kb_vectors" {
-  bucket = aws_s3_bucket.kb_vectors.id
-
-  versioning_configuration {
-    status = "Enabled"
+  encryption_configuration {
+    sse_type = "AES256"
   }
+
+  tags = var.tags
 }
 
-# Enable encryption on vector bucket
-resource "aws_s3_bucket_server_side_encryption_configuration" "kb_vectors" {
-  bucket = aws_s3_bucket.kb_vectors.id
+# S3 Vectors index
+resource "aws_s3vectors_index" "main" {
+  index_name         = "${var.project_name}-idx-${var.environment}"
+  vector_bucket_name = aws_s3vectors_vector_bucket.vectors.vector_bucket_name
 
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
+  # Titan Embeddings G1 - Text v1.2 uses 1536 dimensions
+  dimension       = 1536
+  data_type       = "float32"
+  distance_metric = "cosine"
+
+  tags = var.tags
 }
 
-# Block public access to vector bucket
-resource "aws_s3_bucket_public_access_block" "kb_vectors" {
-  bucket = aws_s3_bucket.kb_vectors.id
+# IAM role for Knowledge Base
+resource "aws_iam_role" "knowledge_base" {
+  name = "${var.project_name}-role-${var.environment}"
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "bedrock.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+        Condition = {
+          StringEquals = {
+            "aws:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+          ArnLike = {
+            "aws:SourceArn" = "arn:aws:bedrock:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:knowledge-base/*"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
 }
 
-# Create Knowledge Base with S3 Vectors using AWS CLI
-# Note: Terraform AWS provider doesn't support S3 Vectors yet, so we use null_resource
-resource "null_resource" "kb_with_s3_vectors" {
+# IAM policy for Knowledge Base
+resource "aws_iam_role_policy" "knowledge_base" {
+  name = "${var.project_name}-pol-${var.environment}"
+  role = aws_iam_role.knowledge_base.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "BedrockInvokeModel"
+        Effect = "Allow"
+        Action = [
+          "bedrock:InvokeModel"
+        ]
+        Resource = "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/amazon.titan-embed-text-v1"
+      },
+      {
+        Sid    = "S3DocumentsAccess"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.documents.arn,
+          "${aws_s3_bucket.documents.arn}/*"
+        ]
+      },
+      {
+        Sid    = "S3VectorsAccess"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3vectors_vector_bucket.vectors.vector_bucket_arn,
+          "${aws_s3vectors_vector_bucket.vectors.vector_bucket_arn}/*"
+        ]
+      },
+      {
+        Sid    = "S3VectorsIndexAccess"
+        Effect = "Allow"
+        Action = [
+          "s3vectors:Query",
+          "s3vectors:QueryVectors",
+          "s3vectors:GetVectors",
+          "s3vectors:PutVector",
+          "s3vectors:PutVectors",
+          "s3vectors:DeleteVector",
+          "s3vectors:GetVector"
+        ]
+        Resource = aws_s3vectors_index.main.index_arn
+      }
+    ]
+  })
+}
+
+# Wait for IAM role to propagate
+resource "time_sleep" "iam_propagation" {
+  create_duration = "30s"
+
   triggers = {
-    kb_name           = var.knowledge_base_name
-    role_arn          = var.kb_role_arn
-    embedding_model   = var.embedding_model
-    vector_bucket_arn = aws_s3_bucket.kb_vectors.arn
-    region            = data.aws_region.current.name
-  }
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      # Create Knowledge Base with S3 Vectors
-      KB_ID=$(aws bedrock-agent create-knowledge-base \
-        --name "${var.knowledge_base_name}" \
-        --role-arn "${var.kb_role_arn}" \
-        --knowledge-base-configuration '{
-          "type": "VECTOR",
-          "vectorKnowledgeBaseConfiguration": {
-            "embeddingModelArn": "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/${var.embedding_model}"
-          }
-        }' \
-        --storage-configuration '{
-          "type": "S3_VECTORS",
-          "s3VectorsConfiguration": {
-            "vectorBucketArn": "${aws_s3_bucket.kb_vectors.arn}"
-          }
-        }' \
-        --region ${data.aws_region.current.name} \
-        --query 'knowledgeBase.knowledgeBaseId' \
-        --output text 2>/dev/null || \
-        aws bedrock-agent list-knowledge-bases \
-          --region ${data.aws_region.current.name} \
-          --query "knowledgeBaseSummaries[?name=='${var.knowledge_base_name}'].knowledgeBaseId | [0]" \
-          --output text)
-      
-      echo "$KB_ID" > ${path.module}/.kb_id
-      
-      # Create S3 Data Source
-      aws bedrock-agent create-data-source \
-        --knowledge-base-id "$KB_ID" \
-        --name "${var.knowledge_base_name}-s3-data-source" \
-        --data-source-configuration '{
-          "type": "S3",
-          "s3Configuration": {
-            "bucketArn": "${aws_s3_bucket.kb_documents.arn}"
-          }
-        }' \
-        --region ${data.aws_region.current.name} 2>/dev/null || true
-    EOT
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
-      if [ -f ${path.module}/.kb_id ]; then
-        KB_ID=$(cat ${path.module}/.kb_id)
-        
-        # Delete data sources first
-        DATA_SOURCES=$(aws bedrock-agent list-data-sources \
-          --knowledge-base-id "$KB_ID" \
-          --region ${self.triggers.region} \
-          --query 'dataSourceSummaries[].dataSourceId' \
-          --output text 2>/dev/null || echo "")
-        
-        for DS_ID in $DATA_SOURCES; do
-          aws bedrock-agent delete-data-source \
-            --knowledge-base-id "$KB_ID" \
-            --data-source-id "$DS_ID" \
-            --region ${self.triggers.region} 2>/dev/null || true
-        done
-        
-        # Wait a bit for data sources to be deleted
-        sleep 5
-        
-        # Delete knowledge base
-        aws bedrock-agent delete-knowledge-base \
-          --knowledge-base-id "$KB_ID" \
-          --region ${self.triggers.region} 2>/dev/null || true
-        
-        rm -f ${path.module}/.kb_id
-      fi
-    EOT
+    policy_checksum = sha256(aws_iam_role_policy.knowledge_base.policy)
   }
 
   depends_on = [
-    aws_s3_bucket.kb_documents,
-    aws_s3_bucket.kb_vectors
+    aws_iam_role_policy.knowledge_base
   ]
 }
 
-# Data source to get the created Knowledge Base details
-data "external" "kb_details" {
-  program = ["bash", "-c", <<-EOT
-    if [ -f ${path.module}/.kb_id ]; then
-      KB_ID=$(cat ${path.module}/.kb_id)
-      aws bedrock-agent get-knowledge-base \
-        --knowledge-base-id "$KB_ID" \
-        --region ${data.aws_region.current.name} \
-        --query '{id: knowledgeBase.knowledgeBaseId, arn: knowledgeBase.knowledgeBaseArn, name: knowledgeBase.name}' \
-        --output json 2>/dev/null || echo '{"id":"","arn":"","name":""}'
-    else
-      echo '{"id":"","arn":"","name":""}'
-    fi
-  EOT
-  ]
+# Knowledge Base using AWSCC provider (AWS provider doesn't support S3 Vectors storage yet)
+resource "awscc_bedrock_knowledge_base" "main" {
+  name        = "${var.project_name}-${var.environment}"
+  description = "Knowledge base for ${var.project_name} (${var.environment} environment)"
+  role_arn    = aws_iam_role.knowledge_base.arn
 
-  depends_on = [null_resource.kb_with_s3_vectors]
+  knowledge_base_configuration = {
+    type = "VECTOR"
+    vector_knowledge_base_configuration = {
+      embedding_model_arn = "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/amazon.titan-embed-text-v1"
+    }
+  }
+
+  storage_configuration = {
+    type = "S3_VECTORS"
+    s3_vectors_configuration = {
+      vector_bucket_arn = aws_s3vectors_vector_bucket.vectors.vector_bucket_arn
+      index_arn         = aws_s3vectors_index.main.index_arn
+    }
+  }
+
+  tags = var.tags
+
+  depends_on = [
+    time_sleep.iam_propagation
+  ]
 }
 
-# Data source to get data source ID
-data "external" "data_source_details" {
-  program = ["bash", "-c", <<-EOT
-    if [ -f ${path.module}/.kb_id ]; then
-      KB_ID=$(cat ${path.module}/.kb_id)
-      DS_ID=$(aws bedrock-agent list-data-sources \
-        --knowledge-base-id "$KB_ID" \
-        --region ${data.aws_region.current.name} \
-        --query 'dataSourceSummaries[0].dataSourceId' \
-        --output text 2>/dev/null || echo "")
-      echo "{\"data_source_id\":\"$DS_ID\"}"
-    else
-      echo '{"data_source_id":""}'
-    fi
-  EOT
-  ]
+# Data Source for Knowledge Base
+resource "awscc_bedrock_data_source" "s3" {
+  knowledge_base_id = awscc_bedrock_knowledge_base.main.knowledge_base_id
+  name              = "${var.project_name}-${var.environment}-s3"
+  description       = "S3 data source for ${var.project_name} knowledge base"
 
-  depends_on = [null_resource.kb_with_s3_vectors]
+  data_source_configuration = {
+    type = "S3"
+    s3_configuration = {
+      bucket_arn = aws_s3_bucket.documents.arn
+    }
+  }
 }
+
+# Data sources
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}

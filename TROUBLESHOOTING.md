@@ -475,7 +475,7 @@ lsof -i :5173  # Frontend port
    ```bash
    aws service-quotas list-service-quotas \
      --service-code bedrock \
-     --region us-east-1
+     --region ap-southeast-1
    ```
 
 4. **Request quota increase:**
@@ -511,7 +511,7 @@ lsof -i :5173  # Frontend port
    ```bash
    aws bedrock-agent get-agent \
      --agent-id ABCDEFGHIJ \
-     --region us-east-1
+     --region ap-southeast-1
    ```
 
 4. **Verify IAM permissions:**
@@ -588,13 +588,13 @@ lsof -i :5173  # Frontend port
 2. **Check network latency:**
    ```bash
    # Ping Bedrock endpoint
-   ping bedrock-agent-runtime.us-east-1.amazonaws.com
+   ping bedrock-agent-runtime.ap-southeast-1.amazonaws.com
    ```
 
 3. **Use closer AWS region:**
    ```bash
    # In .env
-   AWS_REGION=us-east-1  # Choose closest region
+   AWS_REGION=ap-southeast-1  # Choose closest region
    ```
 
 4. **Check Bedrock service status:**

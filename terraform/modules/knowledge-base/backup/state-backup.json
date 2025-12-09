@@ -1,0 +1,70 @@
+{
+  "version": 4,
+  "terraform_version": "1.13.4",
+  "serial": 20,
+  "lineage": "d22aa1b7-da1e-1571-80be-a908f6ca1296",
+  "outputs": {},
+  "resources": [],
+  "check_results": [
+    {
+      "object_kind": "var",
+      "config_addr": "module.bedrock_agent.var.agent_name",
+      "status": "unknown",
+      "objects": null
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "module.bedrock_agent.var.foundation_model",
+      "status": "unknown",
+      "objects": null
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "var.environment",
+      "status": "unknown",
+      "objects": null
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "module.bedrock_agent.var.agent_role_arn",
+      "status": "unknown",
+      "objects": null
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "var.aws_region",
+      "status": "unknown",
+      "objects": [
+        {
+          "object_addr": "var.aws_region",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "module.iam.var.environment",
+      "status": "unknown",
+      "objects": null
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "module.bedrock_agent.var.agent_instruction",
+      "status": "unknown",
+      "objects": null
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "module.bedrock_agent.var.idle_session_ttl",
+      "status": "unknown",
+      "objects": null
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "var.foundation_model",
+      "status": "unknown",
+      "objects": null
+    }
+  ]
+}
+

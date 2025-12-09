@@ -10,14 +10,14 @@ output "bedrock_agent_alias_id" {
   value       = module.bedrock_agent.agent_alias_id
 }
 
-output "bedrock_knowledge_base_id" {
+output "knowledge_base_id" {
   description = "Knowledge Base ID for BEDROCK_KNOWLEDGE_BASE_ID env var"
   value       = module.knowledge_base.knowledge_base_id
 }
 
-output "s3_bucket_name" {
+output "documents_bucket_name" {
   description = "S3 bucket name for uploading knowledge base documents"
-  value       = module.knowledge_base.s3_bucket_name
+  value       = module.knowledge_base.documents_bucket_name
 }
 
 output "aws_region" {
@@ -36,9 +36,9 @@ output "knowledge_base_arn" {
   value       = module.knowledge_base.knowledge_base_arn
 }
 
-output "s3_vector_bucket_name" {
+output "vectors_bucket_name" {
   description = "S3 bucket name for vector storage"
-  value       = module.knowledge_base.s3_vector_bucket_name
+  value       = module.knowledge_base.vectors_bucket_name
 }
 
 output "data_source_id" {
@@ -53,5 +53,5 @@ output "agent_role_arn" {
 
 output "kb_role_arn" {
   description = "IAM role ARN for Knowledge Base"
-  value       = module.iam.kb_role_arn
+  value       = module.knowledge_base.role_arn
 }

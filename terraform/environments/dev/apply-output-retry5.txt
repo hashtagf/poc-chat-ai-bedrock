@@ -1,0 +1,150 @@
+[0m[1mmodule.iam.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mdata.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.knowledge_base.data.aws_region.current: Reading...[0m[0m
+[0m[1mdata.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.knowledge_base.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.knowledge_base.aws_s3vectors_vector_bucket.vectors: Refreshing state...[0m
+[0m[1mdata.aws_region.current: Read complete after 0s [id=ap-southeast-1][0m
+[0m[1mmodule.knowledge_base.aws_s3_bucket.documents: Refreshing state... [id=bedrock-chat-poc-kb-docs-dev][0m
+[0m[1mmodule.knowledge_base.data.aws_region.current: Read complete after 0s [id=ap-southeast-1][0m
+[0m[1mmodule.iam.data.aws_region.current: Read complete after 0s [id=ap-southeast-1][0m
+[0m[1mmodule.iam.data.aws_caller_identity.current: Read complete after 0s [id=315183407016][0m
+[0m[1mmodule.iam.aws_iam_role.agent_role: Refreshing state... [id=bedrock-chat-poc-agent-role-dev][0m
+[0m[1mmodule.knowledge_base.data.aws_caller_identity.current: Read complete after 0s [id=315183407016][0m
+[0m[1mmodule.knowledge_base.aws_iam_role.knowledge_base: Refreshing state... [id=bedrock-chat-poc-kb-role-dev][0m
+[0m[1mdata.aws_caller_identity.current: Read complete after 0s [id=315183407016][0m
+[0m[1mmodule.knowledge_base.aws_s3vectors_index.main: Refreshing state...[0m
+[0m[1mmodule.iam.aws_iam_role_policy.agent_policy: Refreshing state... [id=bedrock-chat-poc-agent-role-dev:bedrock-chat-poc-agent-policy-dev][0m
+[0m[1mmodule.bedrock_agent.aws_bedrockagent_agent.this: Refreshing state... [id=VQCHNVBKMZ][0m
+[0m[1mmodule.knowledge_base.aws_iam_role_policy.knowledge_base: Refreshing state... [id=bedrock-chat-poc-kb-role-dev:bedrock-chat-poc-kb-policy-dev][0m
+[0m[1mmodule.knowledge_base.aws_s3_bucket_versioning.documents: Refreshing state... [id=bedrock-chat-poc-kb-docs-dev][0m
+[0m[1mmodule.knowledge_base.aws_s3_bucket_server_side_encryption_configuration.documents: Refreshing state... [id=bedrock-chat-poc-kb-docs-dev][0m
+[0m[1mmodule.knowledge_base.time_sleep.iam_propagation: Refreshing state... [id=2025-12-09T14:58:34Z][0m
+[0m[1mmodule.bedrock_agent.terraform_data.agent_preparation: Refreshing state... [id=764bd370-72a9-ea5c-e1b5-73adc116d69f][0m
+[0m[1mmodule.bedrock_agent.time_sleep.agent_initialization: Refreshing state... [id=2025-12-09T14:55:58Z][0m
+[0m[1mmodule.bedrock_agent.aws_bedrockagent_agent_alias.draft: Refreshing state... [id=I1DACDN18K,VQCHNVBKMZ][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create[0m
+[31m-[0m/[32m+[0m destroy and then create replacement[0m
+
+Terraform will perform the following actions:
+
+[1m  # module.knowledge_base.awscc_bedrock_data_source.s3[0m will be created
+[0m  [32m+[0m[0m resource "awscc_bedrock_data_source" "s3" {
+      [32m+[0m[0m created_at                           = (known after apply)
+      [32m+[0m[0m data_deletion_policy                 = (known after apply)
+      [32m+[0m[0m data_source_configuration            = {
+          [32m+[0m[0m confluence_configuration  = (known after apply)
+          [32m+[0m[0m s3_configuration          = {
+              [32m+[0m[0m bucket_arn              = "arn:aws:s3:::bedrock-chat-poc-kb-docs-dev"
+              [32m+[0m[0m bucket_owner_account_id = (known after apply)
+              [32m+[0m[0m inclusion_prefixes      = (known after apply)
+            }
+          [32m+[0m[0m salesforce_configuration  = (known after apply)
+          [32m+[0m[0m share_point_configuration = (known after apply)
+          [32m+[0m[0m type                      = "S3"
+          [32m+[0m[0m web_configuration         = (known after apply)
+        }
+      [32m+[0m[0m data_source_id                       = (known after apply)
+      [32m+[0m[0m data_source_status                   = (known after apply)
+      [32m+[0m[0m description                          = "S3 data source for bedrock-chat-poc knowledge base"
+      [32m+[0m[0m failure_reasons                      = (known after apply)
+      [32m+[0m[0m id                                   = (known after apply)
+      [32m+[0m[0m knowledge_base_id                    = (known after apply)
+      [32m+[0m[0m name                                 = "bedrock-chat-poc-kb-dev-s3-data-source"
+      [32m+[0m[0m server_side_encryption_configuration = (known after apply)
+      [32m+[0m[0m updated_at                           = (known after apply)
+      [32m+[0m[0m vector_ingestion_configuration       = (known after apply)
+    }
+
+[1m  # module.knowledge_base.awscc_bedrock_knowledge_base.main[0m will be created
+[0m  [32m+[0m[0m resource "awscc_bedrock_knowledge_base" "main" {
+      [32m+[0m[0m created_at                   = (known after apply)
+      [32m+[0m[0m description                  = "Knowledge base for bedrock-chat-poc (dev environment)"
+      [32m+[0m[0m failure_reasons              = (known after apply)
+      [32m+[0m[0m id                           = (known after apply)
+      [32m+[0m[0m knowledge_base_arn           = (known after apply)
+      [32m+[0m[0m knowledge_base_configuration = {
+          [32m+[0m[0m kendra_knowledge_base_configuration = (known after apply)
+          [32m+[0m[0m sql_knowledge_base_configuration    = (known after apply)
+          [32m+[0m[0m type                                = "VECTOR"
+          [32m+[0m[0m vector_knowledge_base_configuration = {
+              [32m+[0m[0m embedding_model_arn                     = "arn:aws:bedrock:ap-southeast-1::foundation-model/amazon.titan-embed-text-v1"
+              [32m+[0m[0m embedding_model_configuration           = (known after apply)
+              [32m+[0m[0m supplemental_data_storage_configuration = (known after apply)
+            }
+        }
+      [32m+[0m[0m knowledge_base_id            = (known after apply)
+      [32m+[0m[0m name                         = "bedrock-chat-poc-kb-dev"
+      [32m+[0m[0m role_arn                     = "arn:aws:iam::315183407016:role/bedrock-chat-poc-kb-role-dev"
+      [32m+[0m[0m status                       = (known after apply)
+      [32m+[0m[0m storage_configuration        = {
+          [32m+[0m[0m mongo_db_atlas_configuration             = (known after apply)
+          [32m+[0m[0m neptune_analytics_configuration          = (known after apply)
+          [32m+[0m[0m opensearch_managed_cluster_configuration = (known after apply)
+          [32m+[0m[0m opensearch_serverless_configuration      = (known after apply)
+          [32m+[0m[0m pinecone_configuration                   = (known after apply)
+          [32m+[0m[0m rds_configuration                        = (known after apply)
+          [32m+[0m[0m s3_vectors_configuration                 = {
+              [32m+[0m[0m index_arn         = "arn:aws:s3vectors:ap-southeast-1:315183407016:bucket/bedrock-chat-poc-kb-vectors-dev/index/bedrock-chat-poc-kb-index-dev"
+              [32m+[0m[0m index_name        = (known after apply)
+              [32m+[0m[0m vector_bucket_arn = "arn:aws:s3vectors:ap-southeast-1:315183407016:bucket/bedrock-chat-poc-kb-vectors-dev"
+            }
+          [32m+[0m[0m type                                     = "S3_VECTORS"
+        }
+      [32m+[0m[0m tags                         = {
+          [32m+[0m[0m "CreatedAt"   = "2025-12-07"
+          [32m+[0m[0m "Environment" = "dev"
+          [32m+[0m[0m "ManagedBy"   = "Terraform"
+          [32m+[0m[0m "Project"     = "bedrock-chat-poc"
+        }
+      [32m+[0m[0m updated_at                   = (known after apply)
+    }
+
+[1m  # module.knowledge_base.time_sleep.iam_propagation[0m must be [1m[31mreplaced[0m
+[0m[31m-[0m/[32m+[0m[0m resource "time_sleep" "iam_propagation" {
+      [33m~[0m[0m create_duration = "20s" [33m->[0m[0m "30s"
+      [33m~[0m[0m id              = "2025-12-09T14:58:34Z" -> (known after apply)
+      [33m~[0m[0m triggers        = { [31m# forces replacement[0m[0m
+          [32m+[0m[0m "policy_checksum" = "cfbf3280d4502e4675bbbf5a9d4ea29417a2abdf76108231c3f453fe46f223e7"
+          [31m-[0m[0m "policy_version"  = "bedrock-chat-poc-kb-role-dev:bedrock-chat-poc-kb-policy-dev" [90m-> null[0m[0m
+        }
+    }
+
+[1mPlan:[0m 3 to add, 0 to change, 1 to destroy.
+[0m
+Changes to Outputs:
+  [32m+[0m[0m data_source_id         = (known after apply)
+  [32m+[0m[0m knowledge_base_arn     = (known after apply)
+  [32m+[0m[0m knowledge_base_id      = (known after apply)
+[0m[1mmodule.knowledge_base.time_sleep.iam_propagation: Destroying... [id=2025-12-09T14:58:34Z][0m[0m
+[0m[1mmodule.knowledge_base.time_sleep.iam_propagation: Destruction complete after 0s[0m
+[0m[1mmodule.knowledge_base.time_sleep.iam_propagation: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.time_sleep.iam_propagation: Still creating... [00m10s elapsed][0m[0m
+[0m[1mmodule.knowledge_base.time_sleep.iam_propagation: Still creating... [00m20s elapsed][0m[0m
+[0m[1mmodule.knowledge_base.time_sleep.iam_propagation: Still creating... [00m30s elapsed][0m[0m
+[0m[1mmodule.knowledge_base.time_sleep.iam_propagation: Creation complete after 30s [id=2025-12-09T15:00:09Z][0m
+[0m[1mmodule.knowledge_base.awscc_bedrock_knowledge_base.main: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.awscc_bedrock_knowledge_base.main: Still creating... [00m10s elapsed][0m[0m
+[0m[1mmodule.knowledge_base.awscc_bedrock_knowledge_base.main: Creation complete after 17s [id=HVKLKEBTZT][0m
+[0m[1mmodule.knowledge_base.awscc_bedrock_data_source.s3: Creating...[0m[0m
+[0m[1mmodule.knowledge_base.awscc_bedrock_data_source.s3: Creation complete after 6s [id=HVKLKEBTZT|ZOIDPA3WXB][0m
+[0m[1m[32m
+Apply complete! Resources: 3 added, 0 changed, 1 destroyed.
+[0m[0m[1m[32m
+Outputs:
+
+[0magent_arn = "arn:aws:bedrock:ap-southeast-1:315183407016:agent/VQCHNVBKMZ"
+agent_role_arn = "arn:aws:iam::315183407016:role/bedrock-chat-poc-agent-role-dev"
+aws_region = "ap-southeast-1"
+bedrock_agent_alias_id = "I1DACDN18K"
+bedrock_agent_id = "VQCHNVBKMZ"
+data_source_id = "ZOIDPA3WXB"
+documents_bucket_name = "bedrock-chat-poc-kb-docs-dev"
+kb_role_arn = "arn:aws:iam::315183407016:role/bedrock-chat-poc-kb-role-dev"
+knowledge_base_arn = "arn:aws:bedrock:ap-southeast-1:315183407016:knowledge-base/HVKLKEBTZT"
+knowledge_base_id = "HVKLKEBTZT"
+vectors_bucket_name = "bedrock-chat-poc-kb-vectors-dev"

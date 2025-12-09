@@ -4,7 +4,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.0.0"
+      version = ">= 6.25.0"
+    }
+    awscc = {
+      source  = "hashicorp/awscc"
+      version = ">= 1.0.0"
     }
   }
 }
@@ -17,39 +21,36 @@ provider "aws" {
   }
 }
 
+provider "awscc" {
+  region = var.aws_region
+}
+
 # Data source to get current AWS account ID and region
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-# Construct model ARNs for IAM policies
+# Construct model ARN for IAM policies
 locals {
-  foundation_model_arn = "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/${var.foundation_model}"
-  embedding_model_arn  = "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/${var.embedding_model}"
+  foundation_model_arn = "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/${var.foundation_model}"
 }
 
-# IAM Module - Creates roles and policies for Bedrock Agent and Knowledge Base
+# IAM Module - Creates roles and policies for Bedrock Agent
 module "iam" {
   source = "../../modules/iam"
 
   project_name         = var.project_name
   environment          = var.environment
   foundation_model_arn = local.foundation_model_arn
-  embedding_model_arn  = local.embedding_model_arn
-  s3_bucket_arn        = module.knowledge_base.s3_bucket_arn
-  s3_vector_bucket_arn = module.knowledge_base.s3_vector_bucket_arn
   tags                 = var.tags
 }
 
-# Knowledge Base Module - Creates S3 buckets and Knowledge Base with S3 vector store
+# Knowledge Base Module - Creates complete Knowledge Base with S3 Vectors
 module "knowledge_base" {
   source = "../../modules/knowledge-base"
 
-  knowledge_base_name   = var.knowledge_base_name
-  embedding_model       = var.embedding_model
-  kb_role_arn           = module.iam.kb_role_arn
-  s3_bucket_name        = var.s3_bucket_name
-  s3_vector_bucket_name = var.s3_vector_bucket_name
-  tags                  = var.tags
+  project_name = var.project_name
+  environment  = var.environment
+  tags         = var.tags
 }
 
 # Bedrock Agent Module - Creates Bedrock Agent with agent alias

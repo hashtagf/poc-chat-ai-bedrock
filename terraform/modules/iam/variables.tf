@@ -17,21 +17,6 @@ variable "foundation_model_arn" {
   type        = string
 }
 
-variable "embedding_model_arn" {
-  description = "ARN of the embedding model for Knowledge Base"
-  type        = string
-}
-
-variable "s3_bucket_arn" {
-  description = "ARN of the S3 bucket for knowledge base documents"
-  type        = string
-}
-
-variable "s3_vector_bucket_arn" {
-  description = "ARN of the S3 bucket for vector storage"
-  type        = string
-}
-
 variable "tags" {
   description = "Resource tags"
   type        = map(string)

@@ -97,7 +97,7 @@ After creating the state bucket, configure each environment to use it:
      backend "s3" {
        bucket  = "bedrock-chat-poc-terraform-state-dev"
        key     = "dev/terraform.tfstate"
-       region  = "us-east-1"
+       region  = "ap-southeast-1"
        encrypt = true
      }
    }
@@ -123,7 +123,7 @@ Once the backend is configured, you can deploy the infrastructure:
    # General
    environment     = "dev"
    project_name    = "bedrock-chat-poc"
-   aws_region      = "us-east-1"
+   aws_region      = "ap-southeast-1"
 
    # Bedrock Agent
    agent_name           = "bedrock-chat-poc-agent-dev"
@@ -247,7 +247,7 @@ bedrock_agent_id = "ABCDEFGHIJ"
 bedrock_agent_alias_id = "TSTALIASID"
 bedrock_knowledge_base_id = "KB123456789"
 s3_bucket_name = "bedrock-chat-poc-kb-docs-dev"
-aws_region = "us-east-1"
+aws_region = "ap-southeast-1"
 ```
 
 ### Step 2: Update Backend Environment Variables
@@ -260,7 +260,7 @@ cd ../../backend
 
 # Update .env file
 cat > .env << EOF
-AWS_REGION=us-east-1
+AWS_REGION=ap-southeast-1
 BEDROCK_AGENT_ID=ABCDEFGHIJ
 BEDROCK_AGENT_ALIAS_ID=TSTALIASID
 BEDROCK_KNOWLEDGE_BASE_ID=KB123456789
@@ -641,7 +641,7 @@ terraform import <resource_type>.<name> <resource_id>
 1. **Model not available in region**:
    ```bash
    # List available models
-   aws bedrock list-foundation-models --region us-east-1
+   aws bedrock list-foundation-models --region ap-southeast-1
    
    # Verify your model is in the list
    ```
@@ -713,7 +713,7 @@ terraform import <resource_type>.<name> <resource_id>
    ```bash
    # Check VPC endpoint configuration
    aws ec2 describe-vpc-endpoints \
-     --filters "Name=service-name,Values=com.amazonaws.us-east-1.bedrock-agent-runtime"
+     --filters "Name=service-name,Values=com.amazonaws.ap-southeast-1.bedrock-agent-runtime"
    ```
 
 2. **Check security group rules**:
@@ -725,7 +725,7 @@ terraform import <resource_type>.<name> <resource_id>
 3. **Test connectivity from application**:
    ```bash
    # From application instance
-   curl -v https://bedrock-agent-runtime.us-east-1.amazonaws.com
+   curl -v https://bedrock-agent-runtime.ap-southeast-1.amazonaws.com
    
    # Should resolve to private IP (10.x.x.x)
    ```

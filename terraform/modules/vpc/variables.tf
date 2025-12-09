@@ -14,7 +14,7 @@ variable "vpc_cidr" {
 }
 
 variable "availability_zones" {
-  description = "List of availability zones (e.g., ['us-east-1a', 'us-east-1b'])"
+  description = "List of availability zones (e.g., ['ap-southeast-1a', 'ap-southeast-1b'])"
   type        = list(string)
 
   validation {

@@ -70,7 +70,7 @@ Bedrock: BedrockConfig{
     // ...
 }
 AWS: AWSConfig{
-    Region: getEnv("AWS_REGION", "us-east-1"),                 // ✅ Matches output
+    Region: getEnv("AWS_REGION", "ap-southeast-1"),                 // ✅ Matches output
     // ...
 }
 ```

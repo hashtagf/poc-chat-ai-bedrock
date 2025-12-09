@@ -19,7 +19,7 @@ terraform {
     key = "environments/prod/terraform.tfstate"
 
     # AWS region where the state bucket is located
-    region = "us-east-1"
+    region = "ap-southeast-1"
 
     # Enable encryption at rest for state file
     encrypt = true

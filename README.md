@@ -195,7 +195,7 @@ cp .env.example .env
 
 # Edit .env with your configuration
 # Minimum required for development:
-# - AWS_REGION=us-east-1
+# - AWS_REGION=ap-southeast-1
 # - BEDROCK_AGENT_ID=your_agent_id (optional for mock mode)
 # - BEDROCK_AGENT_ALIAS_ID=your_alias_id (optional for mock mode)
 ```
@@ -247,7 +247,7 @@ For development without AWS Bedrock:
 ```bash
 # In .env, leave Bedrock IDs empty:
 ENVIRONMENT=development
-AWS_REGION=us-east-1
+AWS_REGION=ap-southeast-1
 # BEDROCK_AGENT_ID=  (commented out or empty)
 # BEDROCK_AGENT_ALIAS_ID=  (commented out or empty)
 
@@ -1241,12 +1241,12 @@ curl http://localhost:8080/health
 1. **Push images to ECR**
    ```bash
    # Authenticate to ECR
-   aws ecr get-login-password --region us-east-1 | \
-     docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-1.amazonaws.com
+   aws ecr get-login-password --region ap-southeast-1 | \
+     docker login --username AWS --password-stdin <account-id>.dkr.ecr.ap-southeast-1.amazonaws.com
    
    # Tag and push
-   docker tag chat-backend:latest <account-id>.dkr.ecr.us-east-1.amazonaws.com/chat-backend:latest
-   docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/chat-backend:latest
+   docker tag chat-backend:latest <account-id>.dkr.ecr.ap-southeast-1.amazonaws.com/chat-backend:latest
+   docker push <account-id>.dkr.ecr.ap-southeast-1.amazonaws.com/chat-backend:latest
    ```
 
 2. **Create ECS task definition**
@@ -1275,7 +1275,7 @@ curl http://localhost:8080/health
        spec:
          containers:
          - name: backend
-           image: <account-id>.dkr.ecr.us-east-1.amazonaws.com/chat-backend:latest
+           image: <account-id>.dkr.ecr.ap-southeast-1.amazonaws.com/chat-backend:latest
            env:
            - name: ENVIRONMENT
              value: production
@@ -1322,7 +1322,7 @@ SERVER_PORT=8080
 SERVER_HOST=0.0.0.0
 
 # AWS (use IAM roles, not keys)
-AWS_REGION=us-east-1
+AWS_REGION=ap-southeast-1
 
 # Bedrock
 BEDROCK_AGENT_ID=your_production_agent_id
@@ -1416,7 +1416,7 @@ The application uses environment variables for configuration with sensible defau
    ```bash
    # Minimal setup (mock mode)
    ENVIRONMENT=development
-   AWS_REGION=us-east-1
+   AWS_REGION=ap-southeast-1
    
    # With Bedrock integration
    BEDROCK_AGENT_ID=your_agent_id
@@ -1429,7 +1429,7 @@ The application uses environment variables for configuration with sensible defau
 
 - `ENVIRONMENT`: Application environment (development, production, test)
 - `SERVER_PORT`: Server port (default: 8080)
-- `AWS_REGION`: AWS region for Bedrock (default: us-east-1)
+- `AWS_REGION`: AWS region for Bedrock (default: ap-southeast-1)
 - `BEDROCK_AGENT_ID`: Bedrock Agent ID (required in production)
 - `BEDROCK_AGENT_ALIAS_ID`: Bedrock Agent Alias ID (required in production)
 - `BEDROCK_KNOWLEDGE_BASE_ID`: Knowledge Base ID (optional)
@@ -1580,7 +1580,7 @@ For issues and questions:
    # Or use environment variables
    export AWS_ACCESS_KEY_ID=your_key
    export AWS_SECRET_ACCESS_KEY=your_secret
-   export AWS_REGION=us-east-1
+   export AWS_REGION=ap-southeast-1
    ```
 
 5. **Invalid Bedrock configuration**
