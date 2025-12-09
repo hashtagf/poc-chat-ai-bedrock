@@ -18,12 +18,8 @@ const sessionManager = useSessionManager()
 const conversationHistory = useConversationHistory()
 const errorHandler = useErrorHandler()
 
-// Initialize chat service with session ID and callbacks
-const chatService = useChatService({
-  sessionId: sessionManager.currentSessionId.value,
-  onMessageComplete: handleMessageComplete,
-  onError: handleChatError
-})
+// Chat service will be initialized after session is created
+let chatService: ReturnType<typeof useChatService> | null = null
 
 // Connection status tracking
 const connectionStatus = ref<'connected' | 'disconnected' | 'connecting'>('connecting')
@@ -34,11 +30,11 @@ const isSendingMessage = ref(false)
 
 // Computed properties
 const isInputDisabled = computed(() => {
-  return isSendingMessage.value || chatService.isStreaming.value || connectionStatus.value !== 'connected'
+  return isSendingMessage.value || chatService?.isStreaming.value || connectionStatus.value !== 'connected'
 })
 
 const currentError = computed(() => {
-  return chatService.error.value || errorHandler.currentError.value
+  return chatService?.error.value || errorHandler.currentError.value
 })
 
 /**
@@ -56,6 +52,11 @@ const generateMessageId = (): string => {
  * Handle message submission from MessageInput
  */
 const handleMessageSubmit = async (content: string): Promise<void> => {
+  if (!chatService) {
+    errorHandler.handleError(new Error('Chat service not initialized'))
+    return
+  }
+
   try {
     isSendingMessage.value = true
     
@@ -131,7 +132,9 @@ function handleChatError(error: ChatError): void {
  */
 const handleRetry = (): void => {
   // Clear the error
-  chatService.clearError()
+  if (chatService) {
+    chatService.clearError()
+  }
   errorHandler.clearError()
   
   // Retry the last failed message if it exists
@@ -147,7 +150,9 @@ const handleRetry = (): void => {
  * Handle error dismissal from ErrorDisplay
  */
 const handleErrorDismiss = (): void => {
-  chatService.clearError()
+  if (chatService) {
+    chatService.clearError()
+  }
   errorHandler.clearError()
 }
 
@@ -162,8 +167,17 @@ const handleNewSession = async (): Promise<void> => {
     // Create new session
     await sessionManager.createNewSession()
     
+    // Reinitialize chat service with new session
+    chatService = useChatService({
+      sessionId: sessionManager.currentSessionId.value,
+      onMessageComplete: handleMessageComplete,
+      onError: handleChatError
+    })
+    
     // Clear any errors
-    chatService.clearError()
+    if (chatService) {
+      chatService.clearError()
+    }
     errorHandler.clearError()
     
     // Focus input field
@@ -200,7 +214,7 @@ const formatSessionDate = (date: Date): string => {
 }
 
 // Watch for connection status changes
-watch(() => chatService.error.value, (error) => {
+watch(() => chatService?.error.value, (error) => {
   if (error?.code === 'NETWORK_ERROR' || error?.code === 'CONNECTION_LOST') {
     connectionStatus.value = 'disconnected'
   } else if (error?.code === 'STREAMING_IN_PROGRESS') {
@@ -210,16 +224,30 @@ watch(() => chatService.error.value, (error) => {
 
 // Initialize component
 onMounted(async () => {
-  // Simulate initialization delay
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  isInitializing.value = false
-  connectionStatus.value = 'connected'
-  
-  // Focus input field
-  await nextTick()
-  if (messageInputRef.value) {
-    messageInputRef.value.focus()
+  try {
+    // Create initial session
+    await sessionManager.createNewSession()
+    
+    // Initialize chat service with session ID
+    chatService = useChatService({
+      sessionId: sessionManager.currentSessionId.value,
+      onMessageComplete: handleMessageComplete,
+      onError: handleChatError
+    })
+    
+    isInitializing.value = false
+    connectionStatus.value = 'connected'
+    
+    // Focus input field
+    await nextTick()
+    if (messageInputRef.value) {
+      messageInputRef.value.focus()
+    }
+  } catch (error) {
+    console.error('Failed to initialize session:', error)
+    errorHandler.handleError(error)
+    isInitializing.value = false
+    connectionStatus.value = 'disconnected'
   }
 })
 </script>
@@ -305,8 +333,8 @@ onMounted(async () => {
       <MessageList
         ref="messageListRef"
         :messages="conversationHistory.messages.value"
-        :is-streaming="chatService.isStreaming.value"
-        :streaming-content="chatService.streamingMessage.value"
+        :is-streaming="chatService?.isStreaming.value || false"
+        :streaming-content="chatService?.streamingMessage.value || ''"
       />
 
       <!-- ARIA live region for screen readers -->
@@ -316,7 +344,7 @@ onMounted(async () => {
         aria-live="polite"
         aria-atomic="true"
       >
-        <span v-if="chatService.isStreaming.value">
+        <span v-if="chatService?.isStreaming.value">
           Agent is responding
         </span>
         <span v-else-if="isSendingMessage">

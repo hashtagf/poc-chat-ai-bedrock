@@ -10,7 +10,7 @@ import type { ChatService, ChatError } from '@/types'
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'reconnecting'
 
 // Configuration
-const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080/ws'
+const WEBSOCKET_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8080/api/chat/stream'
 const MAX_RECONNECT_ATTEMPTS = 5
 const INITIAL_RECONNECT_DELAY = 1000 // 1 second
 const MAX_RECONNECT_DELAY = 30000 // 30 seconds
@@ -342,10 +342,8 @@ export function useChatService(options: ChatServiceOptions): ChatService {
     // Send the message
     try {
       const messagePayload = {
-        type: 'message',
-        content: trimmedContent,
-        sessionId,
-        timestamp: Date.now()
+        session_id: sessionId,
+        content: trimmedContent
       }
       
       ws!.send(JSON.stringify(messagePayload))
