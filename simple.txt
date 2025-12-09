@@ -1,1 +1,0 @@
-S3 Vectors provides cost-effective vector storage for Amazon Bedrock Knowledge Bases. It costs approximately $5-10 per month compared to $700+ for OpenSearch Serverless.
