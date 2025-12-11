@@ -44,7 +44,7 @@ module "iam" {
   foundation_model_id         = var.foundation_model
   bedrock_agent_id           = module.bedrock_agent.agent_id
   bedrock_agent_alias_id     = module.bedrock_agent.agent_alias_id
-  bedrock_knowledge_base_id  = module.knowledge_base.knowledge_base_id
+  bedrock_knowledge_base_id  = try(module.knowledge_base.knowledge_base_id, null)
   tags                       = var.tags
 }
 
@@ -61,11 +61,12 @@ module "knowledge_base" {
 module "bedrock_agent" {
   source = "../../modules/bedrock-agent"
 
-  agent_name        = var.agent_name
-  foundation_model  = var.foundation_model
-  agent_instruction = var.agent_instruction
-  agent_role_arn    = module.iam.agent_role_arn
-  idle_session_ttl  = var.idle_session_ttl
-  knowledge_base_id = module.knowledge_base.knowledge_base_id
-  tags              = var.tags
+  agent_name                        = var.agent_name
+  foundation_model                  = var.foundation_model
+  agent_instruction                 = var.agent_instruction
+  agent_role_arn                    = module.iam.agent_role_arn
+  idle_session_ttl                  = var.idle_session_ttl
+  knowledge_base_id                 = module.knowledge_base.knowledge_base_id
+  enable_knowledge_base_association = false  # Disable for now to avoid dependency issues
+  tags                              = var.tags
 }

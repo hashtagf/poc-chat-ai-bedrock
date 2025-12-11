@@ -56,7 +56,8 @@ resource "aws_iam_role_policy" "agent_policy" {
         ]
         Resource = [
           var.foundation_model_arn,
-          "arn:aws:bedrock:${local.region}::foundation-model/*"
+          "arn:aws:bedrock:${local.region}::foundation-model/*",
+          "arn:aws:bedrock:*::foundation-model/*"
         ]
       },
       {
@@ -64,9 +65,14 @@ resource "aws_iam_role_policy" "agent_policy" {
         Action = [
           "bedrock:GetInferenceProfile",
           "bedrock:ListInferenceProfiles",
-          "bedrock:UseInferenceProfile"
+          "bedrock:UseInferenceProfile",
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream"
         ]
-        Resource = "arn:aws:bedrock:${local.region}:${local.account_id}:inference-profile/*"
+        Resource = [
+          "arn:aws:bedrock:*:*:inference-profile/*",
+          "arn:aws:bedrock:*::inference-profile/*"
+        ]
       },
       {
         Effect = "Allow"

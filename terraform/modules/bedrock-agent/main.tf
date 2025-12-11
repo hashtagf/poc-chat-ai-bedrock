@@ -53,13 +53,13 @@ resource "time_sleep" "agent_initialization" {
   depends_on = [terraform_data.agent_preparation]
 }
 
-# Associate Knowledge Base with Agent (if provided)
+# Associate Knowledge Base with Agent (if enabled and knowledge base ID provided)
 resource "aws_bedrockagent_agent_knowledge_base_association" "this" {
-  count = var.knowledge_base_id != null ? 1 : 0
+  for_each = var.enable_knowledge_base_association && var.knowledge_base_id != null ? { "main" = var.knowledge_base_id } : {}
 
   agent_id                = aws_bedrockagent_agent.this.id
   agent_version           = "DRAFT"
-  knowledge_base_id       = var.knowledge_base_id
+  knowledge_base_id       = each.value
   description             = "Knowledge base integration for ${var.agent_name}"
   knowledge_base_state    = "ENABLED"
 
@@ -75,7 +75,6 @@ resource "aws_bedrockagent_agent_alias" "draft" {
   tags = var.tags
 
   depends_on = [
-    time_sleep.agent_initialization,
-    aws_bedrockagent_agent_knowledge_base_association.this
+    time_sleep.agent_initialization
   ]
 }

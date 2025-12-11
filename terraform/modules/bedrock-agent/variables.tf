@@ -60,6 +60,12 @@ variable "knowledge_base_id" {
   }
 }
 
+variable "enable_knowledge_base_association" {
+  description = "Whether to create knowledge base association"
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Resource tags"
   type        = map(string)
