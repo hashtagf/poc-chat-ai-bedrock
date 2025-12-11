@@ -21,12 +21,12 @@ resource "aws_iam_policy" "bedrock_agent_user_policy" {
           "bedrock-agent-runtime:InvokeAgentStream",
           "bedrock-agent-runtime:CreateSession",
           "bedrock-agent-runtime:GetSession",
-          "bedrock-agent-runtime:DeleteSession"
+          "bedrock-agent-runtime:DeleteSession",
+          "bedrock-agent-runtime:CreateInvocation",
+          "bedrock-agent-runtime:GetInvocation",
+          "bedrock-agent-runtime:ListInvocations"
         ]
-        Resource = [
-          "arn:aws:bedrock:${local.region}:${local.account_id}:agent/${var.bedrock_agent_id}",
-          "arn:aws:bedrock:${local.region}:${local.account_id}:agent-alias/${var.bedrock_agent_id}/${var.bedrock_agent_alias_id}"
-        ]
+        Resource = "*"
       },
       {
         Effect = "Allow"
@@ -34,9 +34,7 @@ resource "aws_iam_policy" "bedrock_agent_user_policy" {
           "bedrock:Retrieve",
           "bedrock:RetrieveAndGenerate"
         ]
-        Resource = [
-          "arn:aws:bedrock:${local.region}:${local.account_id}:knowledge-base/${var.bedrock_knowledge_base_id}"
-        ]
+        Resource = "*"
       },
       {
         Effect = "Allow"
@@ -45,8 +43,28 @@ resource "aws_iam_policy" "bedrock_agent_user_policy" {
           "bedrock:InvokeModelWithResponseStream"
         ]
         Resource = [
-          "arn:aws:bedrock:${local.region}::foundation-model/${var.foundation_model_id}"
+          "arn:aws:bedrock:*:*:inference-profile/*",
+          "arn:aws:bedrock:*::foundation-model/*"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:GetInferenceProfile",
+          "bedrock:ListInferenceProfiles",
+          "bedrock:UseInferenceProfile"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:GetAgent",
+          "bedrock:ListAgents",
+          "bedrock:GetKnowledgeBase",
+          "bedrock:ListKnowledgeBases"
+        ]
+        Resource = "*"
       }
     ]
   })

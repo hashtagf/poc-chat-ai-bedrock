@@ -40,7 +40,7 @@ resource "terraform_data" "agent_preparation" {
   }
 
   provisioner "local-exec" {
-    command = "aws bedrock-agent prepare-agent --agent-id ${aws_bedrockagent_agent.this.id} --region ${data.aws_region.current.name} || true"
+    command = "aws bedrock-agent prepare-agent --agent-id ${aws_bedrockagent_agent.this.id} --region ${data.aws_region.current.id} || true"
   }
 
   depends_on = [time_sleep.agent_creation_wait]
@@ -53,6 +53,19 @@ resource "time_sleep" "agent_initialization" {
   depends_on = [terraform_data.agent_preparation]
 }
 
+# Associate Knowledge Base with Agent (if provided)
+resource "aws_bedrockagent_agent_knowledge_base_association" "this" {
+  count = var.knowledge_base_id != null ? 1 : 0
+
+  agent_id                = aws_bedrockagent_agent.this.id
+  agent_version           = "DRAFT"
+  knowledge_base_id       = var.knowledge_base_id
+  description             = "Knowledge base integration for ${var.agent_name}"
+  knowledge_base_state    = "ENABLED"
+
+  depends_on = [time_sleep.agent_initialization]
+}
+
 # Create agent alias for DRAFT version
 resource "aws_bedrockagent_agent_alias" "draft" {
   agent_id         = aws_bedrockagent_agent.this.id
@@ -61,5 +74,8 @@ resource "aws_bedrockagent_agent_alias" "draft" {
 
   tags = var.tags
 
-  depends_on = [time_sleep.agent_initialization]
+  depends_on = [
+    time_sleep.agent_initialization,
+    aws_bedrockagent_agent_knowledge_base_association.this
+  ]
 }

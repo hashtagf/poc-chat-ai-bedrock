@@ -51,9 +51,30 @@ resource "aws_iam_role_policy" "agent_policy" {
       {
         Effect = "Allow"
         Action = [
-          "bedrock:InvokeModel"
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream"
         ]
-        Resource = var.foundation_model_arn
+        Resource = [
+          var.foundation_model_arn,
+          "arn:aws:bedrock:${local.region}::foundation-model/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:GetInferenceProfile",
+          "bedrock:ListInferenceProfiles",
+          "bedrock:UseInferenceProfile"
+        ]
+        Resource = "arn:aws:bedrock:${local.region}:${local.account_id}:inference-profile/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:Retrieve",
+          "bedrock:RetrieveAndGenerate"
+        ]
+        Resource = "arn:aws:bedrock:${local.region}:${local.account_id}:knowledge-base/${var.bedrock_knowledge_base_id}"
       }
     ]
   })

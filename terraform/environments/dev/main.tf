@@ -66,5 +66,6 @@ module "bedrock_agent" {
   agent_instruction = var.agent_instruction
   agent_role_arn    = module.iam.agent_role_arn
   idle_session_ttl  = var.idle_session_ttl
+  knowledge_base_id = module.knowledge_base.knowledge_base_id
   tags              = var.tags
 }

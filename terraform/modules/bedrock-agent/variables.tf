@@ -49,6 +49,17 @@ variable "idle_session_ttl" {
   }
 }
 
+variable "knowledge_base_id" {
+  description = "ID of the knowledge base to associate with the agent"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.knowledge_base_id == null || can(regex("^[A-Z0-9]{10}$", var.knowledge_base_id))
+    error_message = "Knowledge base ID must be a 10-character alphanumeric string or null"
+  }
+}
+
 variable "tags" {
   description = "Resource tags"
   type        = map(string)

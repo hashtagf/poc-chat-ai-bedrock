@@ -201,13 +201,18 @@ resource "awscc_bedrock_knowledge_base" "main" {
 # Data Source for Knowledge Base
 resource "awscc_bedrock_data_source" "s3" {
   knowledge_base_id = awscc_bedrock_knowledge_base.main.knowledge_base_id
-  name              = "${var.project_name}-${var.environment}-s3"
+  name              = "${var.project_name}-${var.environment}-s3-v2"
   description       = "S3 data source for ${var.project_name} knowledge base"
+
+  # Set data deletion policy to RETAIN to avoid deletion issues
+  data_deletion_policy = "RETAIN"
 
   data_source_configuration = {
     type = "S3"
     s3_configuration = {
       bucket_arn = aws_s3_bucket.documents.arn
+      # Include all objects in the bucket - use root prefix
+      inclusion_prefixes = ["/"]
     }
   }
 }
