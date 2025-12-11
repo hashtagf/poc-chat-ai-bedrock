@@ -67,6 +67,6 @@ module "bedrock_agent" {
   agent_role_arn                    = module.iam.agent_role_arn
   idle_session_ttl                  = var.idle_session_ttl
   knowledge_base_id                 = module.knowledge_base.knowledge_base_id
-  enable_knowledge_base_association = false  # Disable for now to avoid dependency issues
+  enable_knowledge_base_association = true   # Enable knowledge base integration
   tags                              = var.tags
 }

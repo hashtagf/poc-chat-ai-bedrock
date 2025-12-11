@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="User guide for Chat POC Application">
+    <meta name="keywords" content="chat, bedrock, agent, knowledge base, API">
+    <meta name="author" content="Chat POC Team">
+    <title>Chat POC Application - User Guide</title>
+</head>
+<body>
+    <h1>Chat POC Application User Guide</h1>
+    
+    <h2>Getting Started</h2>
+    <p>The Chat POC Application is a conversational AI system powered by Amazon Bedrock Agent Core. This guide will help you understand how to use the application effectively.</p>
+    
+    <h2>Creating a Chat Session</h2>
+    <p>To start chatting, you need to create a session first:</p>
+    <ol>
+        <li>Send a POST request to <code>/api/sessions</code></li>
+        <li>Include your user ID in the request body</li>
+        <li>Save the returned session ID for future messages</li>
+    </ol>
+    
+    <h2>Sending Messages</h2>
+    <p>Once you have a session, connect to the WebSocket endpoint:</p>
+    <ul>
+        <li>WebSocket URL: <code>ws://localhost:8080/api/chat</code></li>
+        <li>Send JSON messages with session_id, content, and timestamp</li>
+        <li>Receive streaming responses in real-time</li>
+    </ul>
+    
+    <h2>API Reference</h2>
+    <h3>Session Endpoints</h3>
+    <p><strong>POST /api/sessions</strong> - Create a new chat session</p>
+    <p><strong>GET /api/sessions/{id}</strong> - Retrieve session information</p>
+    
+    <h3>WebSocket Messages</h3>
+    <p>Send messages in this format:</p>
+    <pre>
+{
+  "session_id": "your-session-id",
+  "content": "Your message here",
+  "timestamp": "2025-12-11T12:00:00Z"
+}
+    </pre>
+    
+    <h2>Error Handling</h2>
+    <p>The application provides comprehensive error handling:</p>
+    <ul>
+        <li><strong>INVALID_INPUT</strong> - Check your request format</li>
+        <li><strong>SESSION_NOT_FOUND</strong> - Create a new session</li>
+        <li><strong>RATE_LIMIT_EXCEEDED</strong> - Wait before sending more messages</li>
+        <li><strong>SERVICE_ERROR</strong> - Temporary service issue, try again</li>
+    </ul>
+    
+    <h2>Best Practices</h2>
+    <ul>
+        <li>Keep messages under 25,000 characters</li>
+        <li>Handle WebSocket reconnections gracefully</li>
+        <li>Implement proper error handling in your client</li>
+        <li>Use session timeouts appropriately (30 minutes)</li>
+    </ul>
+    
+    <h2>Troubleshooting</h2>
+    <p>If you encounter issues:</p>
+    <ol>
+        <li>Check your network connection</li>
+        <li>Verify your session ID is valid</li>
+        <li>Ensure proper JSON formatting</li>
+        <li>Check the application logs for detailed error information</li>
+    </ol>
+    
+    <h2>Support</h2>
+    <p>For additional support, please refer to the API documentation or contact the development team.</p>
+</body>
+</html>

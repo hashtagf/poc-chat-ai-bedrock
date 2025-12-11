@@ -66,6 +66,30 @@ resource "aws_bedrockagent_agent_knowledge_base_association" "this" {
   depends_on = [time_sleep.agent_initialization]
 }
 
+# Prepare agent again after knowledge base association (if enabled)
+resource "terraform_data" "agent_preparation_after_kb" {
+  count = var.enable_knowledge_base_association && var.knowledge_base_id != null ? 1 : 0
+  
+  triggers_replace = {
+    agent_id = aws_bedrockagent_agent.this.id
+    kb_association = join(",", [for k, v in aws_bedrockagent_agent_knowledge_base_association.this : v.id])
+  }
+
+  provisioner "local-exec" {
+    command = "aws bedrock-agent prepare-agent --agent-id ${aws_bedrockagent_agent.this.id} --region ${data.aws_region.current.id} || true"
+  }
+
+  depends_on = [aws_bedrockagent_agent_knowledge_base_association.this]
+}
+
+# Wait for agent to be ready after KB association
+resource "time_sleep" "agent_kb_ready" {
+  count = var.enable_knowledge_base_association && var.knowledge_base_id != null ? 1 : 0
+  create_duration = "30s"
+
+  depends_on = [terraform_data.agent_preparation_after_kb]
+}
+
 # Create agent alias for DRAFT version
 resource "aws_bedrockagent_agent_alias" "draft" {
   agent_id         = aws_bedrockagent_agent.this.id
@@ -75,6 +99,7 @@ resource "aws_bedrockagent_agent_alias" "draft" {
   tags = var.tags
 
   depends_on = [
-    time_sleep.agent_initialization
+    time_sleep.agent_initialization,
+    time_sleep.agent_kb_ready
   ]
 }

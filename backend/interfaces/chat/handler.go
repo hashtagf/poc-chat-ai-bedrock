@@ -24,19 +24,22 @@ type Handler struct {
 	bedrockService  services.BedrockService
 	streamProcessor *bedrock.StreamProcessor
 	upgrader        websocket.Upgrader
+	knowledgeBaseID string
 }
 
 // HandlerConfig holds configuration for the handler
 type HandlerConfig struct {
-	ReadBufferSize  int
-	WriteBufferSize int
+	ReadBufferSize   int
+	WriteBufferSize  int
+	KnowledgeBaseID  string
 }
 
 // NewHandler creates a new chat handler with default configuration
 func NewHandler(sessionRepo repositories.SessionRepository, bedrockService services.BedrockService, streamProcessor *bedrock.StreamProcessor) *Handler {
 	return NewHandlerWithConfig(sessionRepo, bedrockService, streamProcessor, HandlerConfig{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+		ReadBufferSize:   1024,
+		WriteBufferSize:  1024,
+		KnowledgeBaseID:  "",
 	})
 }
 
@@ -46,6 +49,7 @@ func NewHandlerWithConfig(sessionRepo repositories.SessionRepository, bedrockSer
 		sessionRepo:     sessionRepo,
 		bedrockService:  bedrockService,
 		streamProcessor: streamProcessor,
+		knowledgeBaseID: config.KnowledgeBaseID,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  config.ReadBufferSize,
 			WriteBufferSize: config.WriteBufferSize,
@@ -212,6 +216,12 @@ func (h *Handler) processMessage(ctx context.Context, conn *websocket.Conn, sess
 	input := services.AgentInput{
 		SessionID: req.SessionID,
 		Message:   req.Content,
+	}
+
+	// Add knowledge base ID if configured
+	if h.knowledgeBaseID != "" {
+		input.KnowledgeBaseIDs = []string{h.knowledgeBaseID}
+		log.Printf("[Chat] Using Knowledge Base ID: %s", h.knowledgeBaseID)
 	}
 
 	// Invoke Bedrock agent with streaming

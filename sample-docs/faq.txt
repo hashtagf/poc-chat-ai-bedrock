@@ -1,0 +1,31 @@
+Frequently Asked Questions - Chat POC Application
+
+Q: What is the Chat POC Application?
+A: The Chat POC Application is a Proof of Concept for a chat interface powered by Amazon Bedrock Agent Core with knowledge base integration. It demonstrates the feasibility of conversational AI using Bedrock Agent Core with context-aware responses from integrated knowledge bases.
+
+Q: What technology stack does the application use?
+A: The application uses Go for the backend, Vue 3 with Composition API and Tailwind CSS for the frontend, Amazon Bedrock Agent Core for AI/ML capabilities, MongoDB for data storage, and Docker with Terraform for infrastructure.
+
+Q: How do I create a new chat session?
+A: Send a POST request to /api/sessions with a JSON body containing the user_id. The API will return a session object with an ID that you can use for subsequent chat messages.
+
+Q: How do I send messages in the chat?
+A: Connect to the WebSocket endpoint at /api/chat and send JSON messages with session_id, content, and timestamp fields. The agent will respond with streaming chunks of the response.
+
+Q: What environment variables are required?
+A: The application requires BEDROCK_AGENT_ID, BEDROCK_AGENT_ALIAS_ID, BEDROCK_KNOWLEDGE_BASE_ID, and AWS_REGION environment variables to be set properly.
+
+Q: How does error handling work?
+A: The application implements comprehensive error handling with retry logic, exponential backoff for rate limits, and proper error transformation to user-friendly messages.
+
+Q: What are the API rate limits?
+A: The application supports up to 100 requests per minute per session, with a maximum message length of 25,000 characters and session timeout of 30 minutes.
+
+Q: How do I deploy the application?
+A: The application can be deployed using Docker Compose for local development or Terraform for AWS infrastructure deployment.
+
+Q: What AWS services does the application use?
+A: The application uses Amazon Bedrock Agent Core, Amazon Bedrock Knowledge Base, Amazon S3 for document storage, and various IAM roles for security.
+
+Q: How does the knowledge base integration work?
+A: The Bedrock Agent is associated with a Knowledge Base that contains indexed documents. When users ask questions, the agent can retrieve relevant information from the knowledge base to provide context-aware responses.

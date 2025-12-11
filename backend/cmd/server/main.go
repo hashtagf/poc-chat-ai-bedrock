@@ -26,6 +26,7 @@ func main() {
 	log.Printf("Server: %s:%s", cfg.Server.Host, cfg.Server.Port)
 	log.Printf("AWS Region: %s", cfg.AWS.Region)
 	log.Printf("Log Level: %s", cfg.Logging.Level)
+	log.Printf("Debug - Agent ID: '%s', Alias ID: '%s'", cfg.Bedrock.AgentID, cfg.Bedrock.AgentAliasID)
 
 	// Initialize dependencies
 	sessionRepo := repositories.NewMemorySessionRepository()
@@ -78,8 +79,9 @@ func main() {
 		bedrockService,
 		streamProcessor,
 		chat.HandlerConfig{
-			ReadBufferSize:  cfg.WebSocket.ReadBufferSize,
-			WriteBufferSize: cfg.WebSocket.WriteBufferSize,
+			ReadBufferSize:   cfg.WebSocket.ReadBufferSize,
+			WriteBufferSize:  cfg.WebSocket.WriteBufferSize,
+			KnowledgeBaseID:  cfg.Bedrock.KnowledgeBaseID,
 		},
 	)
 

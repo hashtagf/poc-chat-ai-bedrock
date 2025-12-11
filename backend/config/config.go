@@ -74,7 +74,7 @@ func Load() (*Config, error) {
 			Host: getEnv("SERVER_HOST", "0.0.0.0"),
 		},
 		AWS: AWSConfig{
-			Region:          getEnv("AWS_REGION", "ap-southeast-1"),
+			Region:          getEnv("AWS_REGION", "us-east-1"),
 			AccessKeyID:     getEnv("AWS_ACCESS_KEY_ID", ""),
 			SecretAccessKey: getEnv("AWS_SECRET_ACCESS_KEY", ""),
 			SessionToken:    getEnv("AWS_SESSION_TOKEN", ""),

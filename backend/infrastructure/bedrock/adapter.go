@@ -96,10 +96,16 @@ func (a *Adapter) InvokeAgent(ctx context.Context, input services.AgentInput) (*
 
 	// Build the invoke request
 	invokeInput := &bedrockagentruntime.InvokeAgentInput{
-		AgentId:   aws.String(a.agentID),
+		AgentId:      aws.String(a.agentID),
 		AgentAliasId: aws.String(a.aliasID),
-		SessionId: aws.String(input.SessionID),
-		InputText: aws.String(input.Message),
+		SessionId:    aws.String(input.SessionID),
+		InputText:    aws.String(input.Message),
+	}
+
+	// Knowledge Base is already associated with the agent via Terraform
+	// No need to specify it in SessionState - the agent will use it automatically
+	if len(input.KnowledgeBaseIDs) > 0 {
+		log.Printf("[Bedrock] Agent will use associated Knowledge Base ID: %s", input.KnowledgeBaseIDs[0])
 	}
 
 	// Execute with retry logic
@@ -160,6 +166,12 @@ func (a *Adapter) InvokeAgentStream(ctx context.Context, input services.AgentInp
 		AgentAliasId: aws.String(a.aliasID),
 		SessionId:    aws.String(input.SessionID),
 		InputText:    aws.String(input.Message),
+	}
+
+	// Knowledge Base is already associated with the agent via Terraform
+	// No need to specify it in SessionState - the agent will use it automatically
+	if len(input.KnowledgeBaseIDs) > 0 {
+		log.Printf("[Bedrock] Agent will use associated Knowledge Base ID: %s", input.KnowledgeBaseIDs[0])
 	}
 
 	// Execute with retry logic
