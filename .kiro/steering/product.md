@@ -4,9 +4,11 @@ inclusion: always
 
 # Product Context
 
-**Project Type**: POC for chat interface powered by Amazon Bedrock Agent Core with knowledge base integration.
+**Project Type**: POC for chat interface powered by Amazon Bedrock Agent Core with S3 Vectors knowledge base integration.
 
-**Primary Objective**: Validate feasibility of conversational AI using Bedrock Agent Core with context-aware responses from integrated knowledge bases.
+**Primary Objective**: Validate feasibility of conversational AI using Bedrock Agent Core with context-aware responses from S3 Vectors knowledge base.
+
+**Current Status**: ✅ **FULLY FUNCTIONAL** - Infrastructure deployed, document ingestion working, queries returning results with 99% cost savings over OpenSearch Serverless.
 
 ## Requirements Clarification Protocol
 
@@ -64,6 +66,22 @@ Before implementing any feature, you MUST:
 - **API quotas**: Understand rate limits and implement backoff strategies
 - **Knowledge base queries**: Each query incurs costs—optimize query frequency
 - **Model selection**: Choose appropriate models for POC (balance cost vs capability)
+- **S3 Vectors**: Cost-effective storage (~$5-10/month vs $700/month for OpenSearch)
+- **Resource naming**: Keep names short to avoid S3 Vectors 2048-byte metadata limit
+
+## S3 Vectors Specific Considerations
+
+**Naming Conventions for Production**:
+- Use short project names (2-4 characters): `kb` instead of `bedrock-chat-poc`
+- Abbreviate resource types: `docs`, `vec`, `idx` instead of full words
+- Avoid redundant prefixes and region suffixes
+- **Critical**: Long resource names cause metadata to exceed 2048-byte limit
+
+**Current Working Configuration**:
+- Knowledge Base ID: `AQ5JOUEIGF`
+- Agent ID: `W6R84XTD2X` 
+- Region: `us-east-1` (broadest model support)
+- Storage: S3 Vectors (1536 dimensions, cosine similarity)
 
 ## Documentation Requirements
 

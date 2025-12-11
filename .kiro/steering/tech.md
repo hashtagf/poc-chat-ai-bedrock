@@ -2,20 +2,16 @@
 inclusion: always
 ---
 
----
-inclusion: always
----
-
 # Technology Stack
 
 ## Stack Overview
 
-- **Backend**: Go (idiomatic patterns, standard library)
-- **Frontend**: Vue 3 Composition API + Tailwind CSS
-- **AI/ML**: Amazon Bedrock Agent Core
-- **Data**: MongoDB with vector support
-- **Infrastructure**: Docker, Terraform, Kafka
-- **Monitoring**: LGTM Stack
+- **Backend**: Go 1.23+ (idiomatic patterns, AWS SDK v2)
+- **Frontend**: Vue 3 Composition API + TypeScript + Tailwind CSS
+- **AI/ML**: Amazon Bedrock Agent Core with Knowledge Base (S3 Vectors)
+- **Data**: MongoDB 7.0 for session storage
+- **Infrastructure**: Docker, Terraform, AWS (us-east-1)
+- **WebSocket**: Real-time chat communication
 
 ## Go Code Standards
 
@@ -75,29 +71,72 @@ func (s *Service) Process(ctx context.Context, id string) error {
 - Run `terraform fmt` and `terraform validate` before commits
 - Use modules for reusable infrastructure patterns
 
-## Kafka Integration
+## WebSocket Integration
 
-- Consumer groups for horizontal scaling
-- Idempotent message processing (handle duplicates)
-- Dead letter queues for failed messages
-- Monitor consumer lag metrics
-- Graceful shutdown with context cancellation
+- Real-time bidirectional communication for chat
+- Gorilla WebSocket library for Go backend
+- Session management with MongoDB persistence
+- Graceful connection handling and reconnection
+- Message streaming for Bedrock Agent responses
+
+## Current Infrastructure (Deployed)
+
+**AWS Resources (us-east-1)**:
+- Knowledge Base: `AQ5JOUEIGF` (S3 Vectors, ACTIVE)
+- Bedrock Agent: `W6R84XTD2X` (PREPARED with alias)
+- S3 Buckets: `kb-docs-dev-*`, `kb-vec-dev`
+- Vector Index: `kb-idx-dev` (1536 dimensions, cosine)
+
+**Local Development**:
+- MongoDB 7.0 container for session storage
+- Docker Compose with health checks
+- Environment-based configuration
 
 ## Common Commands
 
 ```bash
-# Build
-go build -o bin/app ./cmd/app
-
-# Test with coverage
+# Backend development
+cd backend
+go build -o bin/server ./cmd/server
 go test ./... -v -cover
 
-# Local development
+# Frontend development  
+cd frontend
+npm run dev
+npm run build
+npm run test
+
+# Infrastructure
+cd terraform/environments/dev
+terraform plan
+terraform apply
+
+# Local development (full stack)
 docker-compose up --build
 
 # Format all code
-gofmt -w . && terraform fmt -recursive
+gofmt -w ./backend && terraform fmt -recursive ./terraform
 
-# Deploy to environment
-terraform apply -var-file=environments/prod.tfvars
+# Test API endpoints
+./backend/test_api.sh
+```
+
+## Environment Configuration
+
+**Required Environment Variables**:
+```bash
+# AWS Configuration
+AWS_REGION=us-east-1
+BEDROCK_AGENT_ID=W6R84XTD2X
+BEDROCK_AGENT_ALIAS_ID=TXENIZDWOS
+BEDROCK_KNOWLEDGE_BASE_ID=AQ5JOUEIGF
+
+# MongoDB
+MONGO_URI=mongodb://admin:password@localhost:27017
+MONGO_DATABASE=chatdb
+
+# Server
+PORT=8080
+WS_TIMEOUT=30s
+SESSION_TIMEOUT=30m
 ```

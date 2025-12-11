@@ -8,27 +8,38 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) with Clean Co
 
 ## Directory Structure
 
-Organize code by architectural layers:
+Current project structure following Hexagonal Architecture:
 
 ```
-src/
+backend/
 ├── domain/           # Business logic, entities, value objects (framework-agnostic)
-│   ├── entities/     # Domain entities
-│   ├── value-objects/
-│   └── repositories/ # Repository interfaces (ports)
-├── application/      # Use cases, application services
-│   └── use-cases/    # Business workflows
-├── infrastructure/   # External adapters (AWS Bedrock, databases, APIs)
-│   ├── bedrock/      # Amazon Bedrock Agent Core integration
-│   ├── knowledge-base/
+│   ├── entities/     # ChatSession, Message, KnowledgeQuery
+│   ├── repositories/ # Repository interfaces (ports)
+│   └── services/     # Domain services (bedrock_service.go)
+├── infrastructure/   # External adapters (AWS Bedrock, MongoDB, etc.)
+│   ├── bedrock/      # Bedrock Agent Core integration (adapter.go)
 │   └── repositories/ # Repository implementations
-└── interfaces/       # Input adapters (CLI, API, UI)
-    └── chat/         # Chat interface implementation
+├── interfaces/       # Input adapters (WebSocket, HTTP API)
+│   └── chat/         # Chat interface implementation
+├── cmd/             # Application entry points
+│   ├── server/       # Main server application
+│   └── wsclient/     # WebSocket client for testing
+└── config/          # Configuration management
 
-tests/
-├── unit/            # Fast, isolated tests for domain logic
-├── integration/     # Tests with external dependencies
-└── e2e/             # End-to-end scenarios
+frontend/
+├── src/             # Vue 3 + TypeScript application
+│   ├── components/   # Reusable Vue components
+│   ├── composables/  # Composition API logic
+│   └── views/        # Page components
+└── dist/            # Built application
+
+terraform/
+├── modules/         # Reusable Terraform modules
+│   ├── bedrock-agent/     # Agent and alias configuration
+│   ├── knowledge-base/    # S3 Vectors knowledge base
+│   └── iam/              # IAM roles and policies
+└── environments/    # Environment-specific configurations
+    └── dev/         # Development environment (us-east-1)
 ```
 
 ## Architectural Principles
