@@ -134,11 +134,11 @@ export function useChatService(options: ChatServiceOptions): ChatService {
       const data = JSON.parse(event.data)
       
       // Handle different message types
-      if (data.type === 'chunk') {
+      if (data.type === 'content') {
         // Streaming chunk received
         isStreaming.value = true
         streamingMessage.value += data.content
-      } else if (data.type === 'complete') {
+      } else if (data.type === 'done') {
         // Streaming complete
         const finalContent = streamingMessage.value
         isStreaming.value = false
