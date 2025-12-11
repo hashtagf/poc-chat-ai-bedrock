@@ -18,9 +18,14 @@ import (
 	"github.com/bedrock-chat-poc/backend/domain/services"
 )
 
+// BedrockClient interface for testing
+type BedrockClient interface {
+	InvokeAgent(ctx context.Context, input *bedrockagentruntime.InvokeAgentInput, optFns ...func(*bedrockagentruntime.Options)) (*bedrockagentruntime.InvokeAgentOutput, error)
+}
+
 // Adapter implements the BedrockService interface using AWS SDK v2
 type Adapter struct {
-	client  *bedrockagentruntime.Client
+	client  BedrockClient
 	agentID string
 	aliasID string
 	config  AdapterConfig

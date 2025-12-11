@@ -117,8 +117,8 @@ func Load() (*Config, error) {
 // Validate validates the configuration
 func (c *Config) Validate() error {
 	// Validate environment
-	if c.Environment != "development" && c.Environment != "production" && c.Environment != "test" {
-		return fmt.Errorf("invalid environment: %s (must be development, production, or test)", c.Environment)
+	if c.Environment != "development" && c.Environment != "production" && c.Environment != "test" && c.Environment != "staging" {
+		return fmt.Errorf("invalid environment: %s (must be development, staging, production, or test)", c.Environment)
 	}
 
 	// Validate server configuration
@@ -131,13 +131,21 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("AWS region is required")
 	}
 
-	// Validate Bedrock configuration (only in production)
+	// Validate Bedrock configuration (only in production and staging)
 	if c.Environment == "production" {
 		if c.Bedrock.AgentID == "" {
 			return fmt.Errorf("Bedrock agent ID is required in production")
 		}
 		if c.Bedrock.AgentAliasID == "" {
 			return fmt.Errorf("Bedrock agent alias ID is required in production")
+		}
+	}
+	if c.Environment == "staging" {
+		if c.Bedrock.AgentID == "" {
+			return fmt.Errorf("Bedrock agent ID is required in staging")
+		}
+		if c.Bedrock.AgentAliasID == "" {
+			return fmt.Errorf("Bedrock agent alias ID is required in staging")
 		}
 	}
 
@@ -170,6 +178,11 @@ func (c *Config) IsProduction() bool {
 // IsTest returns true if running in test mode
 func (c *Config) IsTest() bool {
 	return c.Environment == "test"
+}
+
+// IsStaging returns true if running in staging mode
+func (c *Config) IsStaging() bool {
+	return c.Environment == "staging"
 }
 
 // getEnv gets an environment variable with a default value

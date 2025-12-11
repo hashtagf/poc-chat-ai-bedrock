@@ -38,10 +38,14 @@ locals {
 module "iam" {
   source = "../../modules/iam"
 
-  project_name         = var.project_name
-  environment          = var.environment
-  foundation_model_arn = local.foundation_model_arn
-  tags                 = var.tags
+  project_name                = var.project_name
+  environment                 = var.environment
+  foundation_model_arn        = local.foundation_model_arn
+  foundation_model_id         = var.foundation_model
+  bedrock_agent_id           = module.bedrock_agent.agent_id
+  bedrock_agent_alias_id     = module.bedrock_agent.agent_alias_id
+  bedrock_knowledge_base_id  = module.knowledge_base.knowledge_base_id
+  tags                       = var.tags
 }
 
 # Knowledge Base Module - Creates complete Knowledge Base with S3 Vectors
