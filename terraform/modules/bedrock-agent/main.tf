@@ -55,23 +55,25 @@ resource "time_sleep" "agent_initialization" {
 
 # Associate Knowledge Base with Agent (if enabled and knowledge base ID provided)
 resource "aws_bedrockagent_agent_knowledge_base_association" "this" {
-  for_each = var.enable_knowledge_base_association && var.knowledge_base_id != null ? { "main" = var.knowledge_base_id } : {}
+  # Use a static key so for_each keys are known at plan time; the dynamic ID
+  # is only used in the resource arguments, which can be unknown until apply.
+  for_each = var.enable_knowledge_base_association ? { "main" = true } : {}
 
-  agent_id                = aws_bedrockagent_agent.this.id
-  agent_version           = "DRAFT"
-  knowledge_base_id       = each.value
-  description             = "Knowledge base integration for ${var.agent_name}"
-  knowledge_base_state    = "ENABLED"
+  agent_id          = aws_bedrockagent_agent.this.id
+  agent_version     = "DRAFT"
+  knowledge_base_id = var.knowledge_base_id
+  description       = "Knowledge base integration for ${var.agent_name}"
+  knowledge_base_state = "ENABLED"
 
   depends_on = [time_sleep.agent_initialization]
 }
 
 # Prepare agent again after knowledge base association (if enabled)
 resource "terraform_data" "agent_preparation_after_kb" {
-  count = var.enable_knowledge_base_association && var.knowledge_base_id != null ? 1 : 0
+  count = var.enable_knowledge_base_association ? 1 : 0
   
   triggers_replace = {
-    agent_id = aws_bedrockagent_agent.this.id
+    agent_id      = aws_bedrockagent_agent.this.id
     kb_association = join(",", [for k, v in aws_bedrockagent_agent_knowledge_base_association.this : v.id])
   }
 
@@ -84,7 +86,7 @@ resource "terraform_data" "agent_preparation_after_kb" {
 
 # Wait for agent to be ready after KB association
 resource "time_sleep" "agent_kb_ready" {
-  count = var.enable_knowledge_base_association && var.knowledge_base_id != null ? 1 : 0
+  count           = var.enable_knowledge_base_association ? 1 : 0
   create_duration = "30s"
 
   depends_on = [terraform_data.agent_preparation_after_kb]
